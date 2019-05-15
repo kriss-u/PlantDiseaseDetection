@@ -7,9 +7,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+    Button,
 } from 'react-native';
 import { WebBrowser } from 'expo';
-
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends Component {
@@ -18,10 +18,12 @@ export default class HomeScreen extends Component {
   };
 
   render() {
+    const {navigate} = this.props.navigation;
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
           <View style={styles.welcomeContainer}>
+            <Button title="haha" onPress={()=> navigate('Camera')}/>
             <Image
               source={
                 __DEV__
