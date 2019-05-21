@@ -23,7 +23,7 @@ export default class HomeScreen extends Component {
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
           <View style={styles.welcomeContainer}>
-            <Button title="haha" onPress={()=> navigate('Camera')}/>
+            {/*<Button title="haha" onPress={()=> navigate('Camera')}/>*/}
             <Image
               source={
                 __DEV__
