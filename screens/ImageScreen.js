@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 export default class ImageScreen extends Component {
+
     state = {};
 
     onPictureSaved = async photo => {
