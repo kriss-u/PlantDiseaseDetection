@@ -1,12 +1,9 @@
 import { Platform } from 'react-native';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import React from 'react';
-import CameraScreen from '../screens/CameraScreen'
-import ImageScreen from "../screens/ImageScreen";
-import OutputScreen from '../screens/OutputScreen';
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
-import ProfilesScreen from '../screens/ProfilesScreen';
+import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen} from '../screens';
+
 
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
@@ -50,11 +47,15 @@ CameraStack.navigationOptions = {
 };
 
 
-const ProfilesStack = createStackNavigator({
-  Profiles: ProfilesScreen,
+const usersStack = createSwitchNavigator({
+
+    user: userScreen,
+LoginScreen: LoginScreen,
+    RegisterScreen: RegisterScreen,
+ProfilesScreen: ProfilesScreen
 });
 
-ProfilesStack.navigationOptions = {
+usersStack.navigationOptions = {
   tabBarLabel: 'Profile',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
@@ -68,5 +69,6 @@ ProfilesStack.navigationOptions = {
 export default createBottomTabNavigator({
   HomeStack,
   CameraStack,
-  ProfilesStack,
+  usersStack,
 });
+

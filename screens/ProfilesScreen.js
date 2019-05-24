@@ -1,14 +1,25 @@
-import React from 'react';
-import { ExpoConfigView } from '@expo/samples';
+import React, {Component} from 'react';
+import { View, Text, StyleSheet, Button} from 'react-native';
+import  firebase from  'firebase'
 
-export default class SettingsScreen extends React.Component {
-  static navigationOptions = {
-    title: 'app.json',
-  };
+export default class ProfilesScreen extends React.Component {
 
-  render() {
-    /* Go ahead and delete ExpoConfigView and replace it with your
-     * content, we just wanted to give you a quick view of your config */
-    return <ExpoConfigView />;
-  }
+
+      render() {
+          return (
+              <View style={styles.container}>
+                <Text>DashboardScreen</Text>
+                <Button title="Sign out" onPress={() => firebase.auth().signOut()} />
+              </View>
+          );
+      }
+
 }
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+})

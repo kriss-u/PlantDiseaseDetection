@@ -2,6 +2,10 @@ import React, {Component} from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import * as firebase from 'firebase';
+import {firebaseConfig} from './config';
+
+firebase.initializeApp(firebaseConfig)
 
 export default class App extends Component {
   state = {
