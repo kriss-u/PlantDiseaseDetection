@@ -14,7 +14,6 @@ console.warn = message => {
 export default class LoginScreen extends Component {
     state = { email: '', password: '', errorMessage: null }
     handleLogin = () => {
-        // TODO: Firebase stuff...
         const { email, password } = this.state
         firebase
             .auth()
@@ -23,16 +22,8 @@ export default class LoginScreen extends Component {
             .catch(error => this.setState({ errorMessage: error.message }))
     }
 
-    onSignIn = googleUser => {
-        console.log('Google Auth Response', googleUser);
-        // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-
-    // Build Firebase credential with the Google ID token.
-    var credential = firebase.auth.GoogleAuthProvider.credential(
-        googleUser.idToken,
-        googleUser.accessToken
-    );
-    //console.log(credential)
+    onSignIn = credential => {
+        console.log('Credential', credential);
     // Sign in with credential from the Google user.
     firebase
         .auth()
@@ -40,6 +31,7 @@ export default class LoginScreen extends Component {
         .then(function(result) {
             console.log('result',result);
             if (result.additionalUserInfo.isNewUser) {
+                console.log("the use is not signed up")
                 console.log(result.user.uid);
                 firebase
                     .database()
@@ -47,9 +39,9 @@ export default class LoginScreen extends Component {
                     .set({
                        // profile_picture: result.user.picture,
                         email: result.user.email,
-                        firstname: result.additionalUserInfo.profile.given_name,
-                        lastname: result.additionalUserInfo.profile.family_name,
-                        profile_picture: result.additionalUserInfo.profile.picture,
+                        firstname: result.additionalUserInfo.profile.given_name?result.additionalUserInfo.profile.given_name:result.additionalUserInfo.profile.first_name,
+                        lastname: result.additionalUserInfo.profile.family_name?result.additionalUserInfo.profile.family_name:result.additionalUserInfo.profile.last_name,
+                        profile_picture: result.user.photoURL,
                         phone: result.user.phoneNumber,
                         created_at: Date.now()
                     })
@@ -73,9 +65,7 @@ export default class LoginScreen extends Component {
             var email = error.email;
             // The firebase.auth.AuthCredential type that was used.
             var credential = error.credential;
-            // ...
-            //console.log(errorMessage)
-           // console.log(credential)
+
         })
     };
 
@@ -89,7 +79,12 @@ export default class LoginScreen extends Component {
        // console.log(result);
 
         if (result.type === 'success') {
-            this.onSignIn(result);
+            // Build Firebase credential with the Google ID token.
+            var credential = firebase.auth.GoogleAuthProvider.credential(
+                result.idToken,
+                result.accessToken
+            );
+            this.onSignIn(credential);
 
             return result.accessToken;
         } else {
@@ -102,6 +97,20 @@ export default class LoginScreen extends Component {
         return { error: true };
     }
   };
+
+    async signInWithFacebookAsync() {
+
+        //ENTER YOUR APP ID
+        const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('2289708561085828'
+            , { permissions: ['public_profile'] })
+
+        if (type == 'success') {
+            // Build Firebase credential with the Facebook ID token.
+            const credential = firebase.auth.FacebookAuthProvider.credential(token)
+            this.onSignIn(credential);
+
+        }
+    }
   render() {
     return (
       <View style={styles.container}>
@@ -131,7 +140,7 @@ export default class LoginScreen extends Component {
               onPress={() => this.props.navigation.navigate('RegisterScreen')}
           />
        <Button title="Sign In with Google" onPress={() => this.signInWithGoogleAsync()}/>
-
+          <Button title="Sign In with Facebook" onPress={() => this.signInWithFacebookAsync()}/>
       </View>
     );
   }

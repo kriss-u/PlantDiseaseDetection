@@ -2,15 +2,29 @@ import React from 'react'
 import { StyleSheet, Text, TextInput, View, Button } from 'react-native'
 import firebase from  'firebase'
 export default class RegisterScreen extends React.Component {
-    state = { email: '', password: '', errorMessage: null }
+    state = { email: '', password: '', errorMessage: null, lastname: '', firstname: '' }
     handleSignUp = () => {
-        // TODO: Firebase stuff...
+        let that = this
         firebase
             .auth()
             .createUserWithEmailAndPassword(this.state.email, this.state.password)
-            .then(() => this.props.navigation.navigate('ProfilesScreen'))
+            .then(function(result) {
+                console.log('result',result);
+                    firebase
+                        .database()
+                        .ref('/users/' + result.user.uid)
+                        .set({
+                            // profile_picture: result.user.picture,
+                            email: that.state.email,
+                            firstname: that.state.firstname,
+                            lastname: that.state.lastname,
+                            created_at: Date.now()
+                        })
+                        .then(function() {
+                            this.props.navigation.navigate('ProfilesScreen');
+                        })
             .catch(error => this.setState({ errorMessage: error.message }))
-    }
+    })}
     render() {
         return (
             <View style={styles.container}>
@@ -34,7 +48,21 @@ export default class RegisterScreen extends React.Component {
                     onChangeText={password => this.setState({ password })}
                     value={this.state.password}
                 />
-                <Button title="Sign Up" onPress={this.handleSignUp} />
+                <TextInput
+                    placeholder="Firstname"
+                    autoCapitalize="none"
+                    style={styles.textInput}
+                    onChangeText={firstname => this.setState({ firstname })}
+                    value={this.state.firstname}
+                />
+                <TextInput
+                    placeholder="Lastname"
+                    autoCapitalize="none"
+                    style={styles.textInput}
+                    onChangeText={lastname => this.setState({ lastname })}
+                    value={this.state.lastname}
+                />
+                <Button title="Sign Up" onPress={this.handleSignUp.bind(this)} />
                 <Button
                     title="Already have an account? Login"
                     onPress={() => this.props.navigation.navigate('LoginScreen')}
