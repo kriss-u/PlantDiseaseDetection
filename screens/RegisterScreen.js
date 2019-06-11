@@ -1,9 +1,10 @@
 import React from 'react'
 import { StyleSheet, Text, TextInput, View, Button } from 'react-native'
-import firebase from  'firebase'
+import firebase from "react-native-firebase";
 export default class RegisterScreen extends React.Component {
     state = { email: '', password: '', errorMessage: null, lastname: '', firstname: '' }
     handleSignUp = () => {
+        //save the context outside the .then fucntion
         let that = this
         firebase
             .auth()
@@ -23,8 +24,11 @@ export default class RegisterScreen extends React.Component {
                         .then(function() {
                             this.props.navigation.navigate('ProfilesScreen');
                         })
+            })
             .catch(error => this.setState({ errorMessage: error.message }))
-    })}
+    }
+
+
     render() {
         return (
             <View style={styles.container}>
@@ -62,7 +66,7 @@ export default class RegisterScreen extends React.Component {
                     onChangeText={lastname => this.setState({ lastname })}
                     value={this.state.lastname}
                 />
-                <Button title="Sign Up" onPress={this.handleSignUp.bind(this)} />
+                <Button title="Sign Up" onPress={this.handleSignUp} />
                 <Button
                     title="Already have an account? Login"
                     onPress={() => this.props.navigation.navigate('LoginScreen')}

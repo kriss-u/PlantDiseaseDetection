@@ -48,11 +48,10 @@ CameraStack.navigationOptions = {
 
 
 const usersStack = createSwitchNavigator({
-
     user: userScreen,
-LoginScreen: LoginScreen,
+    LoginScreen: LoginScreen,
     RegisterScreen: RegisterScreen,
-ProfilesScreen: ProfilesScreen
+    ProfilesScreen: ProfilesScreen
 });
 
 usersStack.navigationOptions = {

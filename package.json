@@ -1,28 +1,32 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
+  "name": "plant",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "eject": "expo eject",
-    "test": "node ./node_modules/jest/bin/jest.js --watchAll"
-  },
-  "jest": {
-    "preset": "jest-expo"
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
   },
   "dependencies": {
-    "@expo/samples": "2.1.1",
-    "@expo/vector-icons": "latest",
-    "expo": "^32.0.0",
-    "firebase": "^5.7.3",
-    "react": "16.5.0",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
-    "react-native-immersive": "^2.0.0",
-    "react-navigation": "^3.0.9"
+    "react": "16.8.3",
+    "react-native": "0.59.8",
+    "react-native-fbsdk": "^0.8.0",
+    "react-native-firebase": "^5.4.2",
+    "react-native-gesture-handler": "^1.3.0",
+    "react-native-google-signin": "^2.0.0",
+    "react-native-image-picker": "^0.28.1",
+    "react-navigation": "^3.11.0",
+    "tflite-react-native": "0.0.4",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "babel-preset-expo": "^5.0.0",
-    "jest-expo": "^32.0.1"
+    "@babel/core": "7.4.5",
+    "@babel/runtime": "7.4.5",
+    "babel-jest": "24.8.0",
+    "jest": "24.8.0",
+    "metro-react-native-babel-preset": "0.54.1",
+    "react-test-renderer": "16.8.3"
   },
-  "private": true
+  "jest": {
+    "preset": "react-native"
+  }
 }

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import {PostFeed} from '../components/container'
 import  Icons from '../constants/Icons'
-import { WebBrowser } from 'expo';
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends Component {

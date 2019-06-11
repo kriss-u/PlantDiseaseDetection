@@ -1,111 +1,68 @@
 import React, {Component} from 'react';
-import {CameraRoll, StyleSheet, Text, TouchableOpacity, View, StatusBar } from 'react-native';
-import {Camera, FileSystem, Permissions } from 'expo';
-import { Ionicons } from '@expo/vector-icons';
-
+import {StyleSheet, Button, View } from 'react-native';
+import ImagePicker from "react-native-image-picker"
+const options = {
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+    },
+};
 export default class CameraScreen extends Component {
-    state = {
-        hasPermission: null,
-        type: Camera.Constants.Type.back,
-    };
-
-    async componentDidMount() {
-        const {status} = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
-        this.setState({
-            hasPermission: status === 'granted',
-        });
-        FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'photos').catch(e => {
-            console.log(e, 'Directory exists');
+     openCamera(){
+        // Launch Camera:
+        ImagePicker.launchCamera(options, (response) => {
+            // Same code as in above section!
+            console.log(response.uri)
+            const source = {uri: response.uri};
+            this.setState({
+                photo: source,
+            })
+            const {navigate} = this.props.navigation;
+            navigate('Imagee',
+                { photoss: this.state.photo });
         });
     }
 
-    takePicture() {
-        if (this.camera) {
-            this.camera.takePictureAsync({onPictureSaved: this.isPictureOkay});
-        }
-    };
-
-    isPictureOkay = async photo => {
-        // console.log(photo)
-        const {navigate} = this.props.navigation;
-        navigate('Imagee',
-            { photoss: photo });
+     openGallery(){
+        // Open Image Library:
+        ImagePicker.launchImageLibrary(options, (response) => {
+            // Same code as in above section!
+        });
+    }
+    onPictureSaved = async photo => {
+        alert('Uploading');
+        CameraRoll.saveToCameraRoll(photo.uri, 'photo');
+        this.uploadPicture(await CameraRoll.getPhotos({first:1})
+            .then((r) => {return r.edges[0].node}));
     }
 
-    renderBottomBar = () =>
-        <View
-            style={styles.bottomBar}>
-            <View style={{flex: 0.4}}>
-                <TouchableOpacity
-                    onPress={() => this.takePicture()}
-                    style={{alignSelf: 'center'}}
-                >
-                    <Ionicons name="ios-radio-button-on" size={70} color="white"/>
-                </TouchableOpacity>
-            </View>
-        </View>
+    
 
     render() {
-        const {hasPermission} = this.state;
-        if (hasPermission === null) {
-            return <View/>;
-        } else if (hasPermission === false) {
-            return <Text>Give all accesses</Text>;
-        } else {
-                return (
-                    <View style={{flex: 1}}>
-                        <Camera style={{flex:1}}
-                            ref={(ref) => { this.camera = ref; }}
-                            type={this.state.type}>
-                        <View
-                            style={{
-                                flex: 1,
-                                backgroundColor: 'transparent',
-                                flexDirection: 'row',
-                            }}>
-                            <TouchableOpacity
-                                style={{
-                                    flex: 0.1,
-                                    alignSelf: 'flex-end',
-                                    alignItems: 'center',
-                                }}
-                                onPress={() => {
-                                    this.setState({
-                                        type: this.state.type === Camera.Constants.Type.back
-                                            ? Camera.Constants.Type.front
-                                            : Camera.Constants.Type.back,
-                                    });
-                                }}>
-                                <Text
-                                    style={{fontSize: 18, marginBottom: 10, color: 'white'}}>
-                                    {' '}Flip{' '}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                        {this.renderBottomBar()}
-                    </Camera>
+        
+            return (
+                <View style={styles.container} >
+                    <Button title="Camera" onPress={() => this.openCamera()}/>
+                    <Button title="Gallery" onPress={() => this.openGallery()}/>
                 </View>
-                );
-            }
-        }
+        )               
     }
-
-    const
-    styles = StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: '#000',
-        },
-        camera: {
-            flex: 1,
-            justifyContent: 'space-between',
-        },
-        bottomBar: {
-            paddingBottom: 0,
-            backgroundColor: 'transparent',
-            alignSelf: 'flex-end',
-            justifyContent: 'space-between',
-            flex: 0.12,
-            flexDirection: 'row',
-        },
-    });
+};
+const  styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#000',
+    },
+    camera: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    bottomBar: {
+        paddingBottom: 0,
+        backgroundColor: 'transparent',
+        alignSelf: 'flex-end',
+        justifyContent: 'space-between',
+        flex: 0.12,
+        flexDirection: 'row',
+    },
+});

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { View, Text, StyleSheet, ActivityIndicator} from 'react-native';
-import  firebase from  'firebase'
+import  firebase from  'react-native-firebase'
 
 export default class userScreen extends React.Component {
     componentDidMount() {

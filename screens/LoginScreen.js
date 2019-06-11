@@ -1,16 +1,21 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, Button, TextInput } from 'react-native';
-import firebase from 'firebase';
-import { YellowBox } from 'react-native';
-import _ from 'lodash';
+import firebase from 'react-native-firebase';
+import { GoogleSignin } from 'react-native-google-signin';
 
-YellowBox.ignoreWarnings(['Setting a timer']);
-const _console = _.clone(console);
-console.warn = message => {
-    if (message.indexOf('Setting a timer') <= -1) {
-        _console.warn(message);
-    }
-};
+// import { YellowBox } from 'react-native';
+// import _ from 'lodash';
+// import * as console from "react-native/flow/console";
+//
+// YellowBox.ignoreWarnings(['Setting a timer']);
+// const _console = _.clone(console);
+// console.warn = message => {
+//     if (message.indexOf('Setting a timer') <= -1) {
+//         _console.warn(message);
+//     }
+// };
+
+
 export default class LoginScreen extends Component {
     state = { email: '', password: '', errorMessage: null }
     handleLogin = () => {
@@ -27,7 +32,7 @@ export default class LoginScreen extends Component {
     // Sign in with credential from the Google user.
     firebase
         .auth()
-        .signInAndRetrieveDataWithCredential(credential)
+        .signInWithCredential(credential)
         .then(function(result) {
             console.log('result',result);
             if (result.additionalUserInfo.isNewUser) {
@@ -70,17 +75,19 @@ export default class LoginScreen extends Component {
     };
 
   signInWithGoogleAsync = async () => {
-    try{
-      const result = await Expo.Google.logInAsync({
-          behavior: 'web',
-          androidClientId:'217743586893-k12f2t41bgjiqqt93rm9i0pnlldc9tbu.apps.googleusercontent.com',
-          scopes: ['profile', 'email']
-      });
-       // console.log(result);
+    try{        console.log('result');
 
-        if (result.type === 'success') {
+
+        await GoogleSignin.configure();
+        const userInfo = await GoogleSignin.signIn();
+        console.log(userInfo);
+        const result =  await GoogleSignin.getTokens();
+         console.log(result);
+
+
+        if (true) {
             // Build Firebase credential with the Google ID token.
-            var credential = firebase.auth.GoogleAuthProvider.credential(
+            const credential = firebase.auth.GoogleAuthProvider.credential(
                 result.idToken,
                 result.accessToken
             );
@@ -90,17 +97,23 @@ export default class LoginScreen extends Component {
         } else {
             console.log('cancelled')
             return { cancelled: true };
-            
+
         }
     } catch (e) {
-        console.log('error')
+        console.warn('error')
         return { error: true };
     }
   };
 
     async signInWithFacebookAsync() {
 
-        //ENTER YOUR APP ID
+        try {
+            await GoogleSignin.revokeAccess();
+            await GoogleSignin.signOut();
+            this.setState({ user: null }); // Remember to remove the user from your app's state as well
+        } catch (error) {
+            console.error(error);
+        }
         const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('2289708561085828'
             , { permissions: ['public_profile'] })
 

@@ -11,7 +11,6 @@ import {
     Button,
 } from 'react-native';
 import  Icons from '../../constants/Icons'
-import { WebBrowser } from 'expo';
 import { MonoText } from '../../components/StyledText';
 
 class Post extends Component {
