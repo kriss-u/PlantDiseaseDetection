@@ -1,29 +1,75 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { Platform, StyleSheet, Image, Text, View, TouchableOpacity } from 'react-native';
+import Tflite from 'tflite-react-native';
 import ImagePicker from 'react-native-image-picker';
-import uuid from 'uuid';
 import firebase from 'react-native-firebase'
-const options = {
-    title: 'Select Image',
-    storageOptions: {
-        skipBackup: true,
-        path: 'images'
+let tflite = new Tflite();
+
+const height = 350;
+const width = 350;
+const blue = "#25d5fd";
+const mobile = "MobileNet";
+
+
+type Props = {};
+export default class App extends Component<Props> {
+    constructor(props) {
+        super(props);
+        this.state = {
+            model: null,
+            source: null,
+            imageHeight: height,
+            imageWidth: width,
+            recognitions: []
+        };
     }
-};
 
-export default class App extends Component {
-    state = {
-        imgSource: ''
-    };
-    /**
-     * Select image method
-     */
+    onSelectModel(model) {
+        this.setState({ model });
+        var modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/mobilenet_v1_0_224.tflite`
+        var labelsFile = 'Android/data/Models/mobilenet_v1_1.0_224.txt';
 
-    pickImage = async() => {
-        // Launch Camera:
-        ImagePicker.launchCamera(options, (response) => {
-            console.log('Response = ', response);
+        tflite.loadModel({
+                model: modelFile,
+                labels: labelsFile,
+            },
+            (err, res) => {
+                if (err)
+                    console.log(err);
+                else
+                    console.log(res);
+            });
+    }
 
+    onSelectImage() {
+        const options = {
+            title: 'Select Avatar',
+            customButtons: [{ name: 'fb', title: 'Choose Photo from Facebook' }],
+            storageOptions: {
+                skipBackup: true,
+                path: 'images',
+            },
+        };
+        // Create a reference to the file we want to download
+        const path = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/mobilenet_v1_0_224.tflite`;
+        console.log(path)
+        const ref = firebase.storage().ref('mobilenet_v1_1.0_224[1].tflite');
+
+        const unsubscribe = ref.downloadFile(path).on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            (snapshot) => {
+                console.log(snapshot.bytesTransferred);
+                console.log(snapshot.totalBytes);
+                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                    // complete
+                }
+            },
+            (error) => {
+                unsubscribe();
+                console.error(error);
+            },
+        );
+        ImagePicker.launchImageLibrary(options, (response) => {
             if (response.didCancel) {
                 console.log('User cancelled image picker');
             } else if (response.error) {
@@ -31,103 +77,101 @@ export default class App extends Component {
             } else if (response.customButton) {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
-                const source = {uri: response.uri};
+                var path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
+                var w = response.width;
+                var h = response.height;
                 this.setState({
-                    result: source,
-                })
+                    source: { uri: path },
+                    imageHeight: h * width / w,
+                    imageWidth: width
+                });
+
+
+                tflite.runModelOnImage({
+                        path,
+                        imageMean: 128.0,
+                        imageStd: 128.0,
+                        numResults: 3,
+                        threshold: 0.05
+                    },
+                    (err, res) => {
+                        if (err)
+                            console.log(err);
+                        else
+                            this.setState({ recognitions: res });
+                    });
             }
         });
+    }
 
-        if (!this.state.result) {
-            console.log(this.state.result.uri)
-            await this.uploadImage(this.state.result.uri,uuid.v4());
-        }
-    };
-    uploadImage = async(uri,name) => {
-        const blob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = function() {
-                resolve(xhr.response);
-            };
-            xhr.onerror = function(e) {
-                console.log(e);
-                reject(new TypeError('Network request failed'));
-            };
-            xhr.responseType = 'blob';
-            xhr.open('GET', uri, true);
-            xhr.send(null);
+    renderBoxes() {
+        const { model, recognitions} = this.state;
+
+        return recognitions.map((res, id) => {
+            return (
+                <Text key={id} style={{ color: 'black' }}>
+                    {res["label"] + "-" + (res["confidence"] * 100).toFixed(0) + "%"}
+                </Text>
+            )
         });
-
-
-        let uploadTask = firebase
-            .storage()
-            .ref()
-            .child(name).putFile(blob);
-        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED, // or 'state_changed'
-            function(snapshot) {
-                // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-                var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Upload is ' + progress + '% done');
-                switch (snapshot.state) {
-                    case firebase.storage.TaskState.PAUSED: // or 'paused'
-                        console.log('Upload is paused');
-                        break;
-                    case firebase.storage.TaskState.RUNNING: // or 'running'
-                        console.log('Upload is running');
-                        break;
-                }
-            }, function(error) {
-
-                // A full list of error codes is available at
-                // https://firebase.google.com/docs/storage/web/handle-errors
-                switch (error.code) {
-                    case 'storage/unauthorized':
-                        // User doesn't have permission to access the object
-                        break;
-
-                    case 'storage/canceled':
-                        // User canceled the upload
-                        break;
-
-
-
-                    case 'storage/unknown':
-                        // Unknown error occurred, inspect error.serverResponse
-                        break;
-                }
-            }, function() {
-                // Upload completed successfully, now we can get the download URL
-                uploadTask.snapshot.ref.getDownloadURL().then(function (downloadURL) {
-                    console.log('File available at', downloadURL);
-                });
-            })
-        // We're done with the blob, close and release it
-
-
 
     }
 
+    download() {
+        // Create a reference to the file we want to download
+        const path = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/Apple_mixed_inception_resnet_se.txt`;
+        console.log(path)
+        const ref = firebase.storage().ref('/labels/Apple_mixed_inception_resnet_se.txt');
 
+        const unsubscribe = ref.downloadFile(path).on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            (snapshot) => {
+                console.log(snapshot.bytesTransferred);
+                console.log(snapshot.totalBytes);
+                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                    // complete
+                }
+            },
+            (error) => {
+                unsubscribe();
+                console.error(error);
+            })
+    }
     render() {
+        const { model, source, imageHeight, imageWidth } = this.state;
+        var renderButton = (m) => {
+            return (
+                <TouchableOpacity style={styles.button} onPress={this.onSelectModel.bind(this, m)}>
+                    <Text style={styles.buttonText}>{m}</Text>
+                </TouchableOpacity>
+            );
+        }
         return (
             <View style={styles.container}>
-                <Text style={styles.welcome}>React Native Firebase Image Upload </Text>
-                <Text style={styles.instructions}>Hello 👋, Let us upload an Image</Text>
-                {/** Select Image button */}
-                <TouchableOpacity style={styles.btn} onPress={this.pickImage}>
+                {model ?
+                    <TouchableOpacity style={
+                        [styles.imageContainer, {
+                            height: imageHeight,
+                            width: imageWidth,
+                            borderWidth: source ? 0 : 2
+                        }]} onPress={this.onSelectImage.bind(this)}>
+                        {
+                            source ?
+                                <Image source={source} style={{
+                                    height: imageHeight, width: imageWidth
+                                }} resizeMode="contain" /> :
+                                <Text style={styles.text}>Select Picture</Text>
+                        }
+                        <View style={styles.boxes}>
+                            {this.renderBoxes()}
+                        </View>
+                    </TouchableOpacity>
+                    :
                     <View>
-                        <Text style={styles.btnTxt}>Pick image</Text>
+                        {renderButton(mobile)}
+
                     </View>
-                </TouchableOpacity>
-                {/** Display selected image */}
-                {this.state.imgSource ? (
-                    <Image
-                        source={this.state.imgSource}
-                        style={styles.image}
-                    />
-                ) : (
-                    <Text>Select an Image!</Text>
-                )}
+                }
             </View>
         );
     }
@@ -138,34 +182,39 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F5FCFF'
+        backgroundColor: 'white'
     },
-    welcome: {
-        fontSize: 20,
-        textAlign: 'center',
-        margin: 10
+    imageContainer: {
+        borderColor: blue,
+        borderRadius: 5,
+        alignItems: "center"
     },
-    instructions: {
-        textAlign: 'center',
-        color: '#333333',
-        marginBottom: 5
+    text: {
+        color: blue
     },
-    btn: {
-        borderWidth: 1,
-        paddingLeft: 20,
-        paddingRight: 20,
-        paddingTop: 10,
-        paddingBottom: 10,
-        borderRadius: 20,
-        borderColor: 'rgba(0,0,0,0.3)',
-        backgroundColor: 'rgb(68, 99, 147)'
+    button: {
+        width: 200,
+        backgroundColor: blue,
+        borderRadius: 10,
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10
     },
-    btnTxt: {
-        color: '#fff'
+    buttonText: {
+        color: 'white',
+        fontSize: 15
     },
-    image: {
-        marginTop: 20,
-        minWidth: 200,
-        height: 200
+    box: {
+        position: 'absolute',
+        borderColor: blue,
+        borderWidth: 2,
+    },
+    boxes: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: 0,
     }
 });

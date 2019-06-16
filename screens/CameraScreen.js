@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
-import {StyleSheet, Button, View } from 'react-native';
+import {StyleSheet, Button, View, Platform} from 'react-native';
 import ImagePicker from "react-native-image-picker"
+import uuid from 'uuid';
+
 const options = {
       storageOptions: {
         skipBackup: true,
@@ -11,9 +13,8 @@ export default class CameraScreen extends Component {
      openCamera(){
         // Launch Camera:
         ImagePicker.launchCamera(options, (response) => {
-            // Same code as in above section!
-            console.log(response.uri)
-            const source = {uri: response.uri};
+            let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
+            const source = {uri: path};
             this.setState({
                 photo: source,
             })
@@ -24,9 +25,19 @@ export default class CameraScreen extends Component {
     }
 
      openGallery(){
+         this.setState({name: uuid.v4()})
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
+            let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
+            const source = {uri: path};
+            this.setState({
+                photo: source,
+            })
+            const {navigate} = this.props.navigation;
+            navigate('Imagee',
+                { photoss: this.state.photo,
+                n:this.state.name});
         });
     }
     onPictureSaved = async photo => {
