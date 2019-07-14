@@ -4,21 +4,98 @@ import {
     View,
     Text,
     Dimensions,
-    TouchableOpacity,
+    TouchableOpacity, FlatList, AsyncStorage
 } from "react-native";
 import Modal from "react-native-modal";
 import * as Progress from 'react-native-progress';
-import { CheckBox } from 'react-native-elements'
+import {CheckBox, ListItem, SearchBar} from 'react-native-elements'
 import firebase from "react-native-firebase";
 import uuid from 'uuid';
 import Tflite from 'tflite-react-native';
-let tflite = new Tflite();
-export default class ImageScreen extends Component {
 
-    state = {
-        isUploadModalVisible: false,
-        isPredictionModalVisible: false,
-        uploadProgress: 0,
+let tflite = new Tflite();
+
+export default class ImageScreen extends Component {
+    constructor(){
+        super()
+        this.state = {
+            isUploadModalVisible: false,
+            isPredictionModalVisible: false,
+            uploadProgress: 0,
+            data: [],
+            error: null,
+            isSpeciesSelectionModalVisible: false,
+            species: "unknown",
+            modelName: "unknown",
+            checked: false,
+        };
+        this.arrayholder = [];
+    }
+
+    componentDidMount() {
+        this.getDownloadedModelsList();
+    }
+    toggleSpeciesSelectionModal = () => {
+        this.setState({ isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible });
+    };
+    getDownloadedModelsList = () => {
+        try{
+            AsyncStorage.getAllKeys((err, keys) => {
+                AsyncStorage.multiGet(keys, (err, stores) => {
+                    stores.map((result, i, store) => {
+                        // get at each store's value so you can work with it
+                        let value = JSON.parse(store[i][1]);
+                        this.arrayholder.push(value);
+                    });
+                });
+            });
+            this.setState({
+                data: this.arrayholder,
+            });
+           }catch(error){
+
+        };
+
+    };
+
+    renderSeparator = () => {
+        return (
+            <View
+                style={{
+                    height: 1,
+                    width: '86%',
+                    backgroundColor: '#CED0CE',
+                    marginLeft: '14%',
+                }}
+            />
+        );
+    };
+
+    searchFilterFunction = text => {
+        this.setState({
+            value: text,
+        });
+
+        const newData = this.arrayholder.filter(item => {
+            const itemData = `${item.name.toUpperCase()}  ${item.modelName.toUpperCase()}`;
+            const textData = text.toUpperCase();
+            return itemData.indexOf(textData) > -1;
+        });
+        this.setState({
+            data: newData,
+        });
+    };
+    renderHeader = () => {
+        return (
+            <SearchBar
+                placeholder="Search Model..."
+                lightTheme
+                round
+                onChangeText={text => this.searchFilterFunction(text)}
+                autoCorrect={false}
+                value={this.state.value}
+            />
+        );
     };
     toggleUploadModal = () => {
         this.setState({ isUploadModalVisible: !this.state.isUploadModalVisible });
@@ -26,14 +103,18 @@ export default class ImageScreen extends Component {
     togglePredictionModal = () => {
         this.setState({ isPredictionModalVisible: !this.state.isPredictionModalVisible });
     };
+    selectSpecies = (item) => {
+        this.setState({species: `${item.name}`,modelName: `${item.modelName}`, checked:!this.state.checked})
+        this.toggleSpeciesSelectionModal()
+    }
 
     remoteDiagnosis = async(photo)=>{
         this.toggleUploadModal()
         await this.handleRemoteDiagnosis(photo)
     }
     predict(path) {
-        let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/Apple_mixed_inception_resnet_se.tflite`;
-        let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/Apple_mixed_inception_resnet_se.txt`;
+        let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/`+this.state.modelName+'.tflite';
+        let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/`+this.state.modelName+'.txt';
 
         tflite.loadModel({
                 model: modelFile,
@@ -56,9 +137,8 @@ export default class ImageScreen extends Component {
                 if (err)
                     console.log(err);
                 else
-                    this.togglePredictionModal();
                         res.map((res) => {
-                            console.log(res)
+                            alert(res.label+':'+res.confidence)
                         })
             });
 
@@ -104,7 +184,7 @@ export default class ImageScreen extends Component {
             .then((responseJson) => {
                 //Success
                 this.togglePredictionModal()
-                console.log(responseJson);
+                alert(responseJson[0]+":"+responseJson[1]);
             })
             //If response is not in json then in error
             .catch((error) => {
@@ -131,8 +211,26 @@ export default class ImageScreen extends Component {
               <CheckBox
                   title='I know the species'
                   checked={this.state.checked}
-                  onPress={() => this.setState({checked: !this.state.checked})}
+                  onPress={() => this.toggleSpeciesSelectionModal()}
               />
+              <Modal onBackdropPress = {()=>this.toggleSpeciesSelectionModal()} style={{ flex: 1,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center'}} isVisible={this.state.isSpeciesSelectionModalVisible}>
+                  <FlatList style={{ flex: 1 }}
+                      data={this.state.data}
+                      renderItem={({ item }) => (
+                          <ListItem onPress = {()=>this.selectSpecies(item)}
+                              // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                    title={`${item.name}`}
+                                    subtitle={item.modelName}
+                          />
+                      )}
+                      keyExtractor={item => item.modelName}
+                      ItemSeparatorComponent={this.renderSeparator}
+                      ListHeaderComponent={this.renderHeader}
+                  />
+              </Modal>
               <Modal style={{ flex: 1,
                   flexDirection: 'column',
                   justifyContent: 'center',
@@ -140,7 +238,7 @@ export default class ImageScreen extends Component {
                   <View><Progress.Circle  progress={this.state.uploadProgress} size={200} showsText={true} />
                       <Text style={{color: "#FFFF00"}}>Uploading Image !</Text></View>
               </Modal>
-              <Modal onModalShow={async () =>await this.localDiagnosis(photoToBeChecked.uri)} style={{ flex: 1,
+              <Modal  style={{ flex: 1,
                   flexDirection: 'column',
                   justifyContent: 'center',
                   alignItems: 'center'}} isVisible={this.state.isPredictionModalVisible}>
@@ -162,7 +260,7 @@ export default class ImageScreen extends Component {
               </TouchableOpacity>
                   <TouchableOpacity style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center'}}
                                     onPress={() =>{alert('predicting'),
-                                        this.togglePredictionModal()}}>
+                                        this.localDiagnosis(photoToBeChecked.uri)}}>
                       <Text style={{color: '#FFFFFF'}}>
                           Local Diagnosis
                       </Text>

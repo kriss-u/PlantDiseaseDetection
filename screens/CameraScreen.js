@@ -36,18 +36,14 @@ export default class CameraScreen extends Component {
             })
             const {navigate} = this.props.navigation;
             navigate('Imagee',
-                { photoss: this.state.photo,
-                n:this.state.name});
+                { photoss: this.state.photo});
         });
     }
-    onPictureSaved = async photo => {
-        alert('Uploading');
-        CameraRoll.saveToCameraRoll(photo.uri, 'photo');
-        this.uploadPicture(await CameraRoll.getPhotos({first:1})
-            .then((r) => {return r.edges[0].node}));
+    navigateToDownload(){
+         const  {navigate} = this.props.navigation;
+        navigate('DownloadModels')
     }
 
-    
 
     render() {
         
@@ -55,6 +51,8 @@ export default class CameraScreen extends Component {
                 <View style={styles.container} >
                     <Button title="Camera" onPress={() => this.openCamera()}/>
                     <Button title="Gallery" onPress={() => this.openGallery()}/>
+                    <Button title="Download Models for offline use" onPress={() => this.navigateToDownload() }/>
+
                 </View>
         )               
     }

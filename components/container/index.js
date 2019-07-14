@@ -1,2 +1,3 @@
 import PostFeed from "./PostFeed"
-export {PostFeed};
+import DownloadableModels from "./DownloadableModels"
+export {PostFeed, DownloadableModels};

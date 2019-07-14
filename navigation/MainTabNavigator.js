@@ -2,8 +2,7 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import React from 'react';
 import TabBarIcon from '../components/TabBarIcon';
-import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen} from '../screens';
-
+import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen} from '../screens';
 
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
@@ -26,6 +25,7 @@ HomeStack.navigationOptions = {
 const CameraStack = createStackNavigator({
     Camera: CameraScreen,
     Imagee: ImageScreen,
+    DownloadModels: ModelsDownloadScreen,
     Output: OutputScreen,
     },
     {
