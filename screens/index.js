@@ -7,4 +7,5 @@ import  LoginScreen from './LoginScreen';
 import  RegisterScreen from  './RegisterScreen';
 import userScreen from './userScreen';
 import ModelsDownloadScreen from  './ModelsDownloadScreen'
-export {CameraScreen, ImageScreen, OutputScreen, HomeScreen, ProfilesScreen, LoginScreen, RegisterScreen,userScreen,ModelsDownloadScreen};
+import PostScreen from './PostScreen'
+export {CameraScreen, ImageScreen, OutputScreen, HomeScreen, ProfilesScreen, LoginScreen, RegisterScreen,userScreen,ModelsDownloadScreen, PostScreen};

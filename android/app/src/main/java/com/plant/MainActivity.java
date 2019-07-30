@@ -1,4 +1,6 @@
 package com.plant;
+import com.google.firebase.database.FirebaseDatabase;
+import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
 
@@ -12,4 +14,9 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "plant";
     }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        }
 }

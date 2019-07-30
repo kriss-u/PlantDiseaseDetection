@@ -2,10 +2,13 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import React from 'react';
 import TabBarIcon from '../components/TabBarIcon';
-import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen} from '../screens';
-
+import {Post} from '../components/presentations';
+import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen, PostScreen} from '../screens';
+import {PostFeed} from  '../components/container'
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
+    ProfilesScreen: ProfilesScreen,
+    PostScreen: PostScreen,
 });
 
 HomeStack.navigationOptions = {

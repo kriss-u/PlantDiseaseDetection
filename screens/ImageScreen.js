@@ -35,8 +35,17 @@ export default class ImageScreen extends Component {
     componentDidMount() {
         this.getDownloadedModelsList();
     }
+    toggleChecked = () => {
+        this.setState({checked: !this.state.checked})
+    }
+
     toggleSpeciesSelectionModal = () => {
-        this.setState({ isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible });
+        if(this.state.checked===false||this.state.isSpeciesSelectionModalVisible===true){
+            this.setState({ isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible });
+        }
+        else{
+            this.setState({species: "unknown", modelName: "unknown"})
+        }
     };
     getDownloadedModelsList = () => {
         try{
@@ -104,13 +113,65 @@ export default class ImageScreen extends Component {
         this.setState({ isPredictionModalVisible: !this.state.isPredictionModalVisible });
     };
     selectSpecies = (item) => {
-        this.setState({species: `${item.name}`,modelName: `${item.modelName}`, checked:!this.state.checked})
+        this.setState({species: `${item.name}`,modelName: `${item.modelName}`})
         this.toggleSpeciesSelectionModal()
     }
 
     remoteDiagnosis = async(photo)=>{
         this.toggleUploadModal()
         await this.handleRemoteDiagnosis(photo)
+    }
+
+    localDiagnosis = async (photo)=>{
+            await this.predictOffline(photo);
+        };
+
+    handleRemoteDiagnosis = async (uri) => {
+        const name = uuid.v4()
+        const ref = firebase.storage().ref("/images").child(name);
+        const unsubscribe = ref.putFile(uri).on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            (snapshot) => {
+                console.log(snapshot.bytesTransferred);
+                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                this.setState({uploadProgress: progress})
+                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                    //predict
+                }
+            },
+            (error) => {
+                unsubscribe();
+                console.error(error);
+            },()=>{
+               this.setState({uploadProgress: 0})
+                this.predictOnline(name)
+            })
+            }
+
+    predictOnline(name){
+        this.toggleUploadModal();
+        this.togglePredictionModal();
+        fetch('https://lit-temple-63394.herokuapp.com/disease/'+this.state.species+'/'+name, {
+            method: 'GET'
+            //Request Type
+        })
+            .then((response) => response.json())
+            //If response is in json then in success
+            .then((responseJson) => {
+                //Success
+                this.togglePredictionModal()
+                console.log(responseJson)
+                alert(responseJson[0]+":"+responseJson[1]);
+            })
+            //If response is not in json then in error
+            .catch((error) => {
+                //Error
+                this.togglePredictionModal()
+                console.error(error);
+            });
+    }
+    predictOffline(uri){
+        this.predict(uri)
     }
     predict(path) {
         let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/`+this.state.modelName+'.tflite';
@@ -137,64 +198,27 @@ export default class ImageScreen extends Component {
                 if (err)
                     console.log(err);
                 else
-                        res.map((res) => {
-                            alert(res.label+':'+res.confidence)
-                        })
+                    res.map((res) => {
+                        let name
+
+                            let ref = firebase.database().ref("species/");
+                            let query = ref.orderByChild("common_name")
+                                .equalTo(this.state.species)
+                            query.on("value", function(snapshot) {
+                                snapshot.forEach(function(child) {
+                                    if(res.label !== 'h'){
+                                     var diseaseDetail = child.val().diseases.filter(function (disease) {
+                                        return disease.id === res.label
+                                    })}
+                                    name = diseaseDetail[0].common_name
+                                    console.log(name);
+                                });
+                            });
+
+                        alert(name+':'+res.confidence)
+                    })
             });
 
-    }
-
-
-    localDiagnosis = async (photo)=>{
-            await this.predictOffline(photo);
-        };
-
-
-    handleRemoteDiagnosis = async (uri) => {
-        const name = uuid.v4()
-        const ref = firebase.storage().ref("/images").child(name);
-        const unsubscribe = ref.putFile(uri).on(
-            firebase.storage.TaskEvent.STATE_CHANGED,
-            (snapshot) => {
-                console.log(snapshot.bytesTransferred);
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({uploadProgress: progress})
-                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-                    //predict
-                }
-            },
-            (error) => {
-                unsubscribe();
-                console.error(error);
-            },()=>{
-                console.log(name)
-                this.predictOnline(name)
-            })
-            }
-
-    predictOnline(name){
-        this.toggleUploadModal();
-        this.togglePredictionModal();
-        fetch('https://lit-temple-63394.herokuapp.com/disease/unknown/'+name, {
-            method: 'GET'
-            //Request Type
-        })
-            .then((response) => response.json())
-            //If response is in json then in success
-            .then((responseJson) => {
-                //Success
-                this.togglePredictionModal()
-                alert(responseJson[0]+":"+responseJson[1]);
-            })
-            //If response is not in json then in error
-            .catch((error) => {
-                //Error
-                this.togglePredictionModal()
-                console.error(error);
-            });
-    }
-    predictOffline(uri){
-        this.predict(uri)
     }
 
     render() {
@@ -211,7 +235,7 @@ export default class ImageScreen extends Component {
               <CheckBox
                   title='I know the species'
                   checked={this.state.checked}
-                  onPress={() => this.toggleSpeciesSelectionModal()}
+                  onPress={() =>{this.toggleChecked(); this.toggleSpeciesSelectionModal()}}
               />
               <Modal onBackdropPress = {()=>this.toggleSpeciesSelectionModal()} style={{ flex: 1,
                   flexDirection: 'row',

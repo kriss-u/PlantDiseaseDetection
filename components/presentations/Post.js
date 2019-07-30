@@ -11,18 +11,33 @@ import {
     Button,
 } from 'react-native';
 import  Icons from '../../constants/Icons'
-import { MonoText } from '../../components/StyledText';
+import firebase from "react-native-firebase";
 
 class Post extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             screenWidth: Dimensions.get("window").width,
-            liked: false
+            liked: props.item.liked
 
         };
     }
-    likeToggled() {
+    likeToggled(item) {
+
+        //update upVotes
+        let writeRef = firebase.database().ref('posts/'+item.postid)
+        if(this.state.liked===false) {
+            writeRef.child('likes')
+                .push({
+                    userid: `${item.userid}`
+                })
+        }
+        else {
+             let updates = {};
+             updates["/likes/" + item.likeKey] = null;
+             writeRef.update(updates);
+            //     .
+        }
         this.setState({
             liked: !this.state.liked
         });
@@ -33,16 +48,24 @@ class Post extends Component {
         let imageWidth = this.state.screenWidth
         let  imageHeight= Math.floor(imageWidth*0.6)
         let username = this.props.item.name
-        let upvotes = this.props.item.upVotes
+        let body = this.props.item.body
+        //calculate number of likes
+        let upvotes = this.props.item.likes? Object.keys(this.props.item.likes).length:0
+        let userPic = this.props.item.userProfilePic
+        let postImage = this.props.item.imageurl
+        let nav = this.props.navigation
+        let item = this.props.item
         const upvoteIconColor= (this.state.liked)? 'rgb(251,61,57)':null;
         return (
                 <View style={{flex:1, width: 100+"%"}}>
+                <TouchableOpacity
+                    onPress={() => nav.navigate('ProfilesScreen')}
+                >
                 <View style={styles.userBar}>
                     <View style={{flexDirection: 'row'}}>
                         <Image
-                            source={
-                                require('../../assets/images/apple-scab.jpg')
-                            }
+                            source={{uri: userPic
+                            }}
                             style={styles.userImage}
                         />
                         <Text style={{marginLeft: 10}}>{username}</Text>
@@ -50,26 +73,33 @@ class Post extends Component {
                     <View style={{alignItems:"center"}}>
                         <Text style={{fontSize: 30}}>...</Text>
                     </View>
-                </View>
+                </View></TouchableOpacity>
 
-                <Image
-                    source={
-                        require('../../assets/images/apple-scab.jpg')
-                    }
+                <TouchableOpacity
+                    onPress={() => nav.navigate('PostScreen',{post:item,nav:nav})}>
+                    <Text style={{marginLeft: 60,marginTop: 20}}>{body}</Text>
+
+                    <Image
+                    source={{uri:postImage}}
+
                     style={[styles.postImage,{width: imageWidth,height: imageHeight}]}
                 />
+                </TouchableOpacity>
 
                 <View style={styles.iconBar}>
                     <TouchableOpacity
                         onPress={() =>{
-                            this.likeToggled();
+                            this.likeToggled(item);
                         }}>
                         <Image style={[styles.icon,{tintColor: upvoteIconColor}]} source={Icons.images.upvoteIcon}/>
                     </TouchableOpacity>
+                   
                 </View>
 
                 <View style={styles.commentBar}>
                     <Text>{upvotes} UpVotes</Text>
+                    
+
                 </View>
                 {/*</ScrollView>*/}
             </View>
@@ -84,6 +114,7 @@ const styles = StyleSheet.create({
         width: 100+"%",
         height: 20,
         backgroundColor: "rgb(255,255,255)",
+        marginTop: 5,
         flexDirection: "row",
         paddingHorizontal: 10,
         justifyContent: "space-between"

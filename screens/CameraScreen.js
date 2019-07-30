@@ -18,9 +18,11 @@ export default class CameraScreen extends Component {
             this.setState({
                 photo: source,
             })
-            const {navigate} = this.props.navigation;
-            navigate('Imagee',
-                { photoss: this.state.photo });
+            if(path!=='file://undefined') {
+                const {navigate} = this.props.navigation;
+                navigate('Imagee',
+                    {photoss: this.state.photo});
+            }
         });
     }
 
@@ -34,9 +36,10 @@ export default class CameraScreen extends Component {
             this.setState({
                 photo: source,
             })
+            if(path!=='file://undefined'){
             const {navigate} = this.props.navigation;
             navigate('Imagee',
-                { photoss: this.state.photo});
+                { photoss: this.state.photo});}
         });
     }
     navigateToDownload(){
