@@ -49,9 +49,8 @@ export default class CameraScreen extends Component {
 
 
     render() {
-        
             return (
-                <View style={styles.container} >
+                <View>
                     <Button title="Camera" onPress={() => this.openCamera()}/>
                     <Button title="Gallery" onPress={() => this.openGallery()}/>
                     <Button title="Download Models for offline use" onPress={() => this.navigateToDownload() }/>

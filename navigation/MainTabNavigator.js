@@ -1,10 +1,27 @@
 import { Platform } from 'react-native';
-import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
+import { createBottomTabNavigator, createStackNavigator, createSwitchNavigator } from 'react-navigation';
 import React from 'react';
-import TabBarIcon from '../components/TabBarIcon';
-import { Post } from '../components/presentations';
-import { CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen, PostScreen } from '../screens';
-import { PostFeed } from '../components/container'
+import Icon from 'react-native-vector-icons/Ionicons';
+
+
+import {
+  CameraScreen,
+  HomeScreen,
+  ImageScreen,
+  LoginScreen,
+  ModelsDownloadScreen,
+  OutputScreen,
+  PostScreen,
+  ProfilesScreen,
+  RegisterScreen,
+  userScreen
+} from '../screens';
+
+const COLORS = {
+  FOCUSED: '#009900',
+  DEFAULT: '#000000'
+}
+
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
   ProfilesScreen: ProfilesScreen,
@@ -14,13 +31,11 @@ const HomeStack = createStackNavigator({
 HomeStack.navigationOptions = {
   tabBarLabel: 'Home',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
+    <Icon
       focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-home${focused ? '' : '-outline'}`
-          : 'md-home'
-      }
+      name={Platform.OS === 'ios' ? 'ios-home' : 'md-home'}
+      color={focused ? COLORS.FOCUSED : COLORS.DEFAULT}
+      size={30}
     />
   ),
 };
@@ -43,27 +58,31 @@ CameraStack.navigationOptions = {
   tabBarLabel: 'Diagnose',
   tabBarIcon: ({ focused }) => (
 
-    <TabBarIcon
+    <Icon
       focused={focused}
       name={Platform.OS === 'ios' ? 'ios-camera' : 'md-camera'}
+      color={focused ? COLORS.FOCUSED : COLORS.DEFAULT}
+      size={30}
     />
   ),
 };
 
 
-const usersStack = createSwitchNavigator({
+const UsersStack = createSwitchNavigator({
   user: userScreen,
   LoginScreen: LoginScreen,
   RegisterScreen: RegisterScreen,
   ProfilesScreen: ProfilesScreen
 });
 
-usersStack.navigationOptions = {
+UsersStack.navigationOptions = {
   tabBarLabel: 'Profile',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon
+    <Icon
       focused={focused}
       name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'}
+      color={focused ? COLORS.FOCUSED : COLORS.DEFAULT}
+      size={30}
     />
   ),
 };
@@ -72,6 +91,11 @@ usersStack.navigationOptions = {
 export default createBottomTabNavigator({
   HomeStack,
   CameraStack,
-  usersStack,
-});
+  UsersStack,
+
+}, {
+    tabBarOptions: {
+      showLabel: false
+    }
+  });
 
