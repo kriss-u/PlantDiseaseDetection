@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Image,
     View,
@@ -8,15 +8,16 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import * as Progress from 'react-native-progress';
-import {CheckBox, ListItem, SearchBar} from 'react-native-elements'
+import { CheckBox, ListItem, SearchBar } from 'react-native-elements'
 import firebase from "react-native-firebase";
 import uuid from 'uuid';
 import Tflite from 'tflite-react-native';
+import { NavigationEvents } from 'react-navigation';
 
 let tflite = new Tflite();
 
 export default class ImageScreen extends Component {
-    constructor(){
+    constructor() {
         super()
         this.state = {
             isUploadModalVisible: false,
@@ -36,19 +37,19 @@ export default class ImageScreen extends Component {
         this.getDownloadedModelsList();
     }
     toggleChecked = () => {
-        this.setState({checked: !this.state.checked})
+        this.setState({ checked: !this.state.checked })
     }
 
     toggleSpeciesSelectionModal = () => {
-        if(this.state.checked===false||this.state.isSpeciesSelectionModalVisible===true){
+        if (this.state.checked === false || this.state.isSpeciesSelectionModalVisible === true) {
             this.setState({ isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible });
         }
-        else{
-            this.setState({species: "unknown", modelName: "unknown"})
+        else {
+            this.setState({ species: "unknown", modelName: "unknown" })
         }
     };
     getDownloadedModelsList = () => {
-        try{
+        try {
             AsyncStorage.getAllKeys((err, keys) => {
                 AsyncStorage.multiGet(keys, (err, stores) => {
                     stores.map((result, i, store) => {
@@ -61,7 +62,7 @@ export default class ImageScreen extends Component {
             this.setState({
                 data: this.arrayholder,
             });
-           }catch(error){
+        } catch (error) {
 
         };
 
@@ -113,18 +114,18 @@ export default class ImageScreen extends Component {
         this.setState({ isPredictionModalVisible: !this.state.isPredictionModalVisible });
     };
     selectSpecies = (item) => {
-        this.setState({species: `${item.name}`,modelName: `${item.modelName}`})
+        this.setState({ species: `${item.name}`, modelName: `${item.modelName}` })
         this.toggleSpeciesSelectionModal()
     }
 
-    remoteDiagnosis = async(photo)=>{
+    remoteDiagnosis = async (photo) => {
         this.toggleUploadModal()
         await this.handleRemoteDiagnosis(photo)
     }
 
-    localDiagnosis = async (photo)=>{
-            await this.predictOffline(photo);
-        };
+    localDiagnosis = async (photo) => {
+        await this.predictOffline(photo);
+    };
 
     handleRemoteDiagnosis = async (uri) => {
         const name = uuid.v4()
@@ -134,7 +135,7 @@ export default class ImageScreen extends Component {
             (snapshot) => {
                 console.log(snapshot.bytesTransferred);
                 let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({uploadProgress: progress})
+                this.setState({ uploadProgress: progress })
                 if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                     //predict
                 }
@@ -142,16 +143,16 @@ export default class ImageScreen extends Component {
             (error) => {
                 unsubscribe();
                 console.error(error);
-            },()=>{
-               this.setState({uploadProgress: 0})
+            }, () => {
+                this.setState({ uploadProgress: 0 })
                 this.predictOnline(name)
             })
-            }
+    }
 
-    predictOnline(name){
+    predictOnline(name) {
         this.toggleUploadModal();
         this.togglePredictionModal();
-        fetch('https://lit-temple-63394.herokuapp.com/disease/'+this.state.species+'/'+name, {
+        fetch('https://lit-temple-63394.herokuapp.com/disease/' + this.state.species + '/' + name, {
             method: 'GET'
             //Request Type
         })
@@ -160,8 +161,9 @@ export default class ImageScreen extends Component {
             .then((responseJson) => {
                 //Success
                 this.togglePredictionModal()
-                console.log(responseJson)
-                alert(responseJson[0]+":"+responseJson[1]);
+                console.log("result: " + responseJson)
+                const { navigate } = this.props.navigation;
+                navigate('Output', { result: responseJson });
             })
             //If response is not in json then in error
             .catch((error) => {
@@ -170,17 +172,17 @@ export default class ImageScreen extends Component {
                 console.error(error);
             });
     }
-    predictOffline(uri){
+    predictOffline(uri) {
         this.predict(uri)
     }
     predict(path) {
-        let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/`+this.state.modelName+'.tflite';
-        let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/`+this.state.modelName+'.txt';
+        let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/` + this.state.modelName + '.tflite';
+        let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/` + this.state.modelName + '.txt';
 
         tflite.loadModel({
-                model: modelFile,
-                labels: labelsFile,
-            },
+            model: modelFile,
+            labels: labelsFile,
+        },
             (err, res) => {
                 if (err)
                     console.log(err);
@@ -188,12 +190,12 @@ export default class ImageScreen extends Component {
                     console.log(res);
             });
         tflite.runModelOnImage({
-                path,
-                imageMean: 0.0,
-                imageStd: 255.0,
-                numResults: 4,
-                threshold: 0.05
-            },
+            path,
+            imageMean: 0.0,
+            imageStd: 255.0,
+            numResults: 4,
+            threshold: 0.05
+        },
             (err, res) => {
                 if (err)
                     console.log(err);
@@ -201,97 +203,108 @@ export default class ImageScreen extends Component {
                     res.map((res) => {
                         let name
 
-                            let ref = firebase.database().ref("species/");
-                            let query = ref.orderByChild("common_name")
-                                .equalTo(this.state.species)
-                            query.on("value", function(snapshot) {
-                                snapshot.forEach(function(child) {
-                                    if(res.label !== 'h'){
-                                     var diseaseDetail = child.val().diseases.filter(function (disease) {
+                        let ref = firebase.database().ref("species/");
+                        let query = ref.orderByChild("common_name")
+                            .equalTo(this.state.species)
+                        query.on("value", function (snapshot) {
+                            snapshot.forEach(function (child) {
+                                if (res.label !== 'h') {
+                                    var diseaseDetail = child.val().diseases.filter(function (disease) {
                                         return disease.id === res.label
-                                    })}
-                                    name = diseaseDetail[0].common_name
-                                    console.log(name);
-                                });
+                                    })
+                                }
+                                name = diseaseDetail[0].common_name
+                                console.log(name);
                             });
+                        });
 
-                        alert(name+':'+res.confidence)
+                        alert(name + ':' + res.confidence)
                     })
             });
 
     }
 
     render() {
-        let {height, width} = Dimensions.get('window');
+        let { height, width } = Dimensions.get('window');
         let photoToBeChecked = this.props.navigation.state.params.photoss;
         return (
-          <View style={{flex: 1}}>
-              <Image
-                  style={{flex: 1,
-                  height: height,
-                  width: width }}
-                  source={{uri:photoToBeChecked.uri}}/>
+            <View style={{ flex: 1 }}>
+                <Image
+                    style={{
+                        flex: 1,
+                        height: height,
+                        width: width
+                    }}
+                    source={{ uri: photoToBeChecked.uri }} />
 
-              <CheckBox
-                  title='I know the species'
-                  checked={this.state.checked}
-                  onPress={() =>{this.toggleChecked(); this.toggleSpeciesSelectionModal()}}
-              />
-              <Modal onBackdropPress = {()=>this.toggleSpeciesSelectionModal()} style={{ flex: 1,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center'}} isVisible={this.state.isSpeciesSelectionModalVisible}>
-                  <FlatList style={{ flex: 1 }}
-                      data={this.state.data}
-                      renderItem={({ item }) => (
-                          <ListItem onPress = {()=>this.selectSpecies(item)}
-                              // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                    title={`${item.name}`}
-                                    subtitle={item.modelName}
-                          />
-                      )}
-                      keyExtractor={item => item.modelName}
-                      ItemSeparatorComponent={this.renderSeparator}
-                      ListHeaderComponent={this.renderHeader}
-                  />
-              </Modal>
-              <Modal style={{ flex: 1,
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center'}} isVisible={this.state.isUploadModalVisible}>
-                  <View><Progress.Circle  progress={this.state.uploadProgress} size={200} showsText={true} />
-                      <Text style={{color: "#FFFF00"}}>Uploading Image !</Text></View>
-              </Modal>
-              <Modal  style={{ flex: 1,
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center'}} isVisible={this.state.isPredictionModalVisible}>
-                  <View><Progress.CircleSnail indeterminateAnimationDuration={200} size={200} color={[ 'blue']} />
-                      <Text style={{color: "#FFFF00"}}>Diagnosing Image !</Text></View>
-              </Modal>
-              <View style={{flexDirection: 'row', height: 100}}>
-              <TouchableOpacity style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center', borderColor: '#FFFFFF'}}
-                                onPress={() => this.props.navigation.goBack()}>
-                  <Text style={{color: '#FFFFFF'}}>
-                      Cancel
+                <CheckBox
+                    title='I know the species'
+                    checked={this.state.checked}
+                    onPress={() => { this.toggleChecked(); this.toggleSpeciesSelectionModal() }}
+                />
+                <Modal onBackdropPress={() => this.toggleSpeciesSelectionModal()} style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }} isVisible={this.state.isSpeciesSelectionModalVisible}>
+                    <FlatList style={{ flex: 1 }}
+                        data={this.state.data}
+                        renderItem={({ item }) => (
+                            <ListItem onPress={() => this.selectSpecies(item)}
+                                // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                title={`${item.name}`}
+                                subtitle={item.modelName}
+                            />
+                        )}
+                        keyExtractor={item => item.modelName}
+                        ItemSeparatorComponent={this.renderSeparator}
+                        ListHeaderComponent={this.renderHeader}
+                    />
+                </Modal>
+                <Modal style={{
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }} isVisible={this.state.isUploadModalVisible}>
+                    <View><Progress.Circle progress={this.state.uploadProgress} size={200} showsText={true} />
+                        <Text style={{ color: "#FFFF00" }}>Uploading Image !</Text></View>
+                </Modal>
+                <Modal style={{
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }} isVisible={this.state.isPredictionModalVisible}>
+                    <View><Progress.CircleSnail indeterminateAnimationDuration={200} size={200} color={['blue']} />
+                        <Text style={{ color: "#FFFF00" }}>Diagnosing Image !</Text></View>
+                </Modal>
+                <View style={{ flexDirection: 'row', height: 100 }}>
+                    <TouchableOpacity style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center', borderColor: '#FFFFFF' }}
+                        onPress={() => this.props.navigation.goBack()}>
+                        <Text style={{ color: '#FFFFFF' }}>
+                            Cancel
                   </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center'}}
-                                onPress={() =>this.remoteDiagnosis(photoToBeChecked.uri)}>
-                  <Text style={{color: '#FFFFFF'}}>
-                      Remote Diagnosis
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center' }}
+                        onPress={() => this.remoteDiagnosis(photoToBeChecked.uri)}>
+                        <Text style={{ color: '#FFFFFF' }}>
+                            Remote Diagnosis
                   </Text>
-              </TouchableOpacity>
-                  <TouchableOpacity style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center'}}
-                                    onPress={() =>{alert('predicting'),
-                                        this.localDiagnosis(photoToBeChecked.uri)}}>
-                      <Text style={{color: '#FFFFFF'}}>
-                          Local Diagnosis
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center' }}
+                        onPress={() => {
+                            alert('predicting'),
+                                this.localDiagnosis(photoToBeChecked.uri)
+                        }}>
+                        <Text style={{ color: '#FFFFFF' }}>
+                            Local Diagnosis
                       </Text>
-                  </TouchableOpacity>
-              </View>
+                    </TouchableOpacity>
+                </View>
 
-          </View>
+            </View>
         );
     }
 }

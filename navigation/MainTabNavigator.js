@@ -2,13 +2,13 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator, createSwitchNavigator, createAppContainer } from 'react-navigation';
 import React from 'react';
 import TabBarIcon from '../components/TabBarIcon';
-import {Post} from '../components/presentations';
-import {CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen, PostScreen} from '../screens';
-import {PostFeed} from  '../components/container'
+import { Post } from '../components/presentations';
+import { CameraScreen, ImageScreen, OutputScreen, HomeScreen, userScreen, LoginScreen, ProfilesScreen, RegisterScreen, ModelsDownloadScreen, PostScreen } from '../screens';
+import { PostFeed } from '../components/container'
 const HomeStack = createStackNavigator({
   Home: HomeScreen,
-    ProfilesScreen: ProfilesScreen,
-    PostScreen: PostScreen,
+  ProfilesScreen: ProfilesScreen,
+  PostScreen: PostScreen,
 });
 
 HomeStack.navigationOptions = {
@@ -26,21 +26,22 @@ HomeStack.navigationOptions = {
 };
 
 const CameraStack = createStackNavigator({
-    Camera: CameraScreen,
-    Imagee: ImageScreen,
-    DownloadModels: ModelsDownloadScreen,
-    Output: OutputScreen,
-    },
-    {
-        headerMode: 'none',
-        navigationOptions: {
-            headerVisible: false,
-        }
-    });
+  Camera: CameraScreen,
+  Imagee: ImageScreen,
+  DownloadModels: ModelsDownloadScreen,
+  Output: OutputScreen,
+},
+  // {
+  //     headerMode: 'none',
+  //     navigationOptions: {
+  //         headerVisible: false,
+  //     }
+  // }
+);
 
 CameraStack.navigationOptions = {
-    tabBarLabel:'Diagnose',
-    tabBarIcon: ({ focused }) => (
+  tabBarLabel: 'Diagnose',
+  tabBarIcon: ({ focused }) => (
 
     <TabBarIcon
       focused={focused}
@@ -51,10 +52,10 @@ CameraStack.navigationOptions = {
 
 
 const usersStack = createSwitchNavigator({
-    user: userScreen,
-    LoginScreen: LoginScreen,
-    RegisterScreen: RegisterScreen,
-    ProfilesScreen: ProfilesScreen
+  user: userScreen,
+  LoginScreen: LoginScreen,
+  RegisterScreen: RegisterScreen,
+  ProfilesScreen: ProfilesScreen
 });
 
 usersStack.navigationOptions = {
