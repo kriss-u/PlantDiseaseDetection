@@ -6,8 +6,6 @@ import {
     Text,
     View,
     TouchableNativeFeedback,
-    TouchableOpacity,
-    TouchableWithoutFeedback
 } from 'react-native';
 import NetInfo from "@react-native-community/netinfo";
 import ImagePicker from "react-native-image-picker";
@@ -33,7 +31,7 @@ async function requestCameraPermission() {
                 // buttonNegative: 'Cancel',
                 buttonPositive: 'OK',
             },*/
-        )
+        );
         const grantedLog = Object.values(granted);
 
         if (grantedLog.includes('denied')) {
@@ -57,7 +55,7 @@ async function requestStoragePermission() {
                 // buttonNegative: 'Cancel',
                 buttonPositive: 'OK',
             },*/
-        )
+        );
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
             console.log('Permission granted');
         } else {
@@ -70,59 +68,58 @@ async function requestStoragePermission() {
 
 export default class CameraScreen extends Component {
     constructor(props) {
-        super(props)
-        this.state = {
-            storagePermissionGranted: PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+        super(props);
+    }
+
+    launchCamera(options, response) {
+        let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
+        const source = {uri: path};
+        this.setState({
+            photo: source,
+        });
+        if (path !== 'file://undefined') {
+            const {navigate} = this.props.navigation;
+            navigate('Imagee',
+                {photoss: this.state.photo});
         }
     }
 
     openCamera() {
-        requestCameraPermission();
-        // Launch Camera:
-        ImagePicker.launchCamera(options, (response) => {
-            let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
-            const source = {uri: path};
-            this.setState({
-                photo: source,
-            })
-            if (path !== 'file://undefined') {
-                const {navigate} = this.props.navigation;
-                navigate('Imagee',
-                    {photoss: this.state.photo});
-            }
+        requestCameraPermission().then(() => {
+            // Launch Camera:
+            ImagePicker.launchCamera(options, (response) => {
+                this.launchCamera(options, response);
+            });
         });
     }
 
     openGallery() {
-        requestCameraPermission();
-        this.setState({name: uuid.v4()})
-        // Open Image Library:
-        ImagePicker.launchImageLibrary(options, (response) => {
-            // Same code as in above section!
-            let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
-            const source = {uri: path};
-            this.setState({
-                photo: source,
-            })
-            if (path !== 'file://undefined') {
-                const {navigate} = this.props.navigation;
-                navigate('Imagee',
-                    {photoss: this.state.photo});
-            }
+        requestCameraPermission().then(() => {
+            this.setState({name: uuid.v4()});
+            // Open Image Library:
+            ImagePicker.launchImageLibrary(options, (response) => {
+                // Same code as in above section!
+                this.launchCamera(options, response);
+            });
         });
     }
 
     navigateToDownload() {
-
-        requestStoragePermission();
-        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
-            const {navigate} = this.props.navigation;
-            if (result === true) {
-                navigate('DownloadModels');
+        NetInfo.fetch().then(state => {
+            if (state.isInternetReachable) {
+                requestStoragePermission().then(() => {
+                    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
+                        const {navigate} = this.props.navigation;
+                        if (result === true) {
+                            navigate('DownloadModels');
+                        }
+                    });
+                });
+            } else {
+                alert("You don't have working internet connection");
             }
         });
     }
-
 
     render() {
         return (
@@ -176,8 +173,9 @@ export default class CameraScreen extends Component {
                 </TouchableNativeFeedback>
             </View>
         )
-    }
-};
+    };
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
