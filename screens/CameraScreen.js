@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback
 } from 'react-native';
+import NetInfo from "@react-native-community/netinfo";
 import ImagePicker from "react-native-image-picker";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -113,6 +114,7 @@ export default class CameraScreen extends Component {
     }
 
     navigateToDownload() {
+
         requestStoragePermission();
         PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
             const {navigate} = this.props.navigation;
