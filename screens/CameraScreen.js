@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Button, Platform, StyleSheet, View, Text} from 'react-native';
+import {Button, Platform, StyleSheet, View, Text, PermissionsAndroid} from 'react-native';
 import ImagePicker from "react-native-image-picker";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -11,8 +11,63 @@ const options = {
         path: 'images',
     },
 };
+
+async function requestCameraPermission() {
+    try {
+        const granted = await PermissionsAndroid.requestMultiple(
+            [PermissionsAndroid.PERMISSIONS.CAMERA, PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE]
+            /*{
+                title: 'Leafnosis Permissions',
+                message: ':( Sorry, we need camera and storage permissions to capture and save photo. Please grant them, otherwise you cannot capture photos',
+                // buttonNeutral: 'Ask Me Later',
+                // buttonNegative: 'Cancel',
+                buttonPositive: 'OK',
+            },*/
+        )
+        const grantedLog = Object.values(granted);
+
+        if (grantedLog.includes('denied')) {
+            console.log('Permission denied');
+        } else {
+            console.log('Permission granted');
+        }
+    } catch (err) {
+        console.warn(err);
+    }
+}
+
+async function requestStoragePermission() {
+    try {
+        const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+            /*{
+                title: 'Leafnosis Permissions',
+                message: ':( Sorry, we need storage permission read your photo. Please grant it, otherwise you we cannot read photos',
+                // buttonNeutral: 'Ask Me Later',
+                // buttonNegative: 'Cancel',
+                buttonPositive: 'OK',
+            },*/
+        )
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+            console.log('Permission granted');
+        } else {
+            console.log('Permission denied');
+        }
+    } catch (err) {
+        console.warn(err);
+    }
+}
+
 export default class CameraScreen extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            storagePermissionGranted: PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+
     openCamera() {
+        requestCameraPermission();
         // Launch Camera:
         ImagePicker.launchCamera(options, (response) => {
             let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
@@ -29,6 +84,7 @@ export default class CameraScreen extends Component {
     }
 
     openGallery() {
+        requestCameraPermission();
         this.setState({name: uuid.v4()})
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
@@ -47,8 +103,13 @@ export default class CameraScreen extends Component {
     }
 
     navigateToDownload() {
-        const {navigate} = this.props.navigation;
-        navigate('DownloadModels')
+        requestStoragePermission();
+        PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
+            const {navigate} = this.props.navigation;
+            if (result === true) {
+                navigate('DownloadModels');
+            }
+        });
     }
 
 
