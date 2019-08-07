@@ -17,7 +17,7 @@ export default class ModelsDownloadScreen extends Component {
 
     remoteDiagnosis = async()=>{
 
-    }
+    };
 
     localDiagnosis = async ()=>{
     };
@@ -42,8 +42,6 @@ export default class ModelsDownloadScreen extends Component {
                         <Text>Models download</Text>
                     </View>
                     <DownloadableModels/>
-
-
             </View>
         );
     }

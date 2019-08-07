@@ -98,6 +98,7 @@ export default class ImageScreen extends Component {
             data: newData,
         });
     };
+
     renderHeader = () => {
         return (
             <SearchBar

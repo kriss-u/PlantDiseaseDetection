@@ -105,19 +105,13 @@ export default class CameraScreen extends Component {
     }
 
     navigateToDownload() {
-        NetInfo.fetch().then(state => {
-            if (state.isInternetReachable) {
-                requestStoragePermission().then(() => {
-                    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
-                        const {navigate} = this.props.navigation;
-                        if (result === true) {
-                            navigate('DownloadModels');
-                        }
-                    });
-                });
-            } else {
-                alert("You don't have working internet connection");
-            }
+        requestStoragePermission().then(() => {
+            PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
+                const {navigate} = this.props.navigation;
+                if (result === true) {
+                    navigate('DownloadModels');
+                }
+            });
         });
     }
 
