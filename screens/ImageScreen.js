@@ -27,6 +27,8 @@ export default class ImageScreen extends Component {
             uploadProgress: 0,
             data: [],
             diseaseData: [],
+            diseaseDetail: [],
+            disease: '',
             error: null,
             isSpeciesSelectionModalVisible: false,
             species: "unknown",
@@ -125,10 +127,12 @@ export default class ImageScreen extends Component {
         this.toggleSpeciesSelectionModal()
     }
     selectDisease = (item) => {
-        this.setState({
-            diseases: `${item}`
-        })
+        // console.log(item)
+        const { navigate } = this.props.navigation;
         this.toggleDiseaseModal()
+        navigate('Output', {
+            result: item
+        })
     }
 
     remoteDiagnosis = async (photo) => {
@@ -173,8 +177,19 @@ export default class ImageScreen extends Component {
             //If response is in json then in success
             .then((responseJson) => {
                 //Success
+                // console.log(responseJson)
+                let response = responseJson
+                let array = []
+                response.forEach(data => {
+                    let object = {}
+                    object.species = data[2][0]
+                    object.disease = data[0]
+                    object.diseaseConfidence = data[1]
+                    object.speciesConfidence = data[2][1]
+                    array.push(object)
+                })
                 this.setState({
-                    diseaseData: responseJson
+                    diseaseData: array
                 })
                 this.toggleDiseaseModal()
                 this.togglePredictionModal()
@@ -309,11 +324,11 @@ export default class ImageScreen extends Component {
                             renderItem={({ item }) => (
                                 <ListItem onPress={() => this.selectDisease(item)}
                                     // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                    title={`${item}`}
-                                // subtitle={item.modelName}
+                                    title={`${item.species} Confidence: ${item.speciesConfidence}`}
+                                    subtitle={`${item.disease} Confidence: ${item.diseaseConfidence}`}
                                 />
                             )}
-                            keyExtractor={item => item[2][0]}
+                            keyExtractor={item => item.disease}
                             ItemSeparatorComponent={this.renderSeparator}
                             ListHeaderComponent={this.renderHeader}
                         /></View>
