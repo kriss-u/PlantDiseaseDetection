@@ -20,10 +20,13 @@ export default class ImageScreen extends Component {
     constructor() {
         super()
         this.state = {
+            whole_data: [],
             isUploadModalVisible: false,
             isPredictionModalVisible: false,
+            isDiseaseModalVisible: false,
             uploadProgress: 0,
             data: [],
+            diseaseData: [],
             error: null,
             isSpeciesSelectionModalVisible: false,
             species: "unknown",
@@ -113,9 +116,18 @@ export default class ImageScreen extends Component {
     togglePredictionModal = () => {
         this.setState({ isPredictionModalVisible: !this.state.isPredictionModalVisible });
     };
+    toggleDiseaseModal = () => {
+        this.setState({ isDiseaseModalVisible: !this.state.isDiseaseModalVisible });
+    };
     selectSpecies = (item) => {
         this.setState({ species: `${item.name}`, modelName: `${item.modelName}` })
         this.toggleSpeciesSelectionModal()
+    }
+    selectDisease = (item) => {
+        this.setState({
+            diseases: `${item}`
+        })
+        this.toggleDiseaseModal()
     }
 
     remoteDiagnosis = async (photo) => {
@@ -149,7 +161,7 @@ export default class ImageScreen extends Component {
             })
     }
 
-    predictOnline(name) {
+    predictOnline = (name) => {
         this.toggleUploadModal();
         this.togglePredictionModal();
         fetch('https://lit-temple-63394.herokuapp.com/disease/' + this.state.species + '/' + name, {
@@ -160,10 +172,11 @@ export default class ImageScreen extends Component {
             //If response is in json then in success
             .then((responseJson) => {
                 //Success
+                this.setState({
+                    diseaseData: responseJson
+                })
+                this.toggleDiseaseModal()
                 this.togglePredictionModal()
-                console.log("result: " + responseJson)
-                const { navigate } = this.props.navigation;
-                navigate('Output', { result: responseJson });
             })
             //If response is not in json then in error
             .catch((error) => {
@@ -279,6 +292,30 @@ export default class ImageScreen extends Component {
                 }} isVisible={this.state.isPredictionModalVisible}>
                     <View><Progress.CircleSnail indeterminateAnimationDuration={200} size={200} color={['blue']} />
                         <Text style={{ color: "#FFFF00" }}>Diagnosing Image !</Text></View>
+                </Modal>
+                <Modal style={{
+                    flex: 1,
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }} isVisible={this.state.isDiseaseModalVisible}>
+                    <View style={{
+                        width: 300,
+                        height: 300
+                    }}>
+                        <FlatList style={{ flex: 1 }}
+                            data={this.state.diseaseData}
+                            renderItem={({ item }) => (
+                                <ListItem onPress={() => this.selectDisease(item)}
+                                    // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                    title={`${item}`}
+                                // subtitle={item.modelName}
+                                />
+                            )}
+                            keyExtractor={item => item[2][0]}
+                            ItemSeparatorComponent={this.renderSeparator}
+                            ListHeaderComponent={this.renderHeader}
+                        /></View>
                 </Modal>
                 <View style={{ flexDirection: 'row', height: 100 }}>
                     <TouchableOpacity style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center', borderColor: '#FFFFFF' }}
