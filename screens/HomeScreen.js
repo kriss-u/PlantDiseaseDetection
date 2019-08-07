@@ -1,14 +1,19 @@
+<<<<<<< HEAD
 import React, { Component } from 'react';
+=======
+import React, {Component} from 'react';
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
 import {
+    Button,
+    Dimensions,
     Image,
     Platform,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
-    Dimensions,
     View,
-    Button, FlatList, TextInput,
 } from 'react-native';
 import { PostFeed } from '../components/container'
 import Modal from "react-native-modal";
@@ -23,31 +28,48 @@ const options = {
     },
 };
 export default class HomeScreen extends Component {
+<<<<<<< HEAD
     constructor() {
         super()
+=======
+    constructor(props) {
+        super(props)
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
         this.state = {
             isNewPostModalVisible: false,
             textInputHeight: 40,
-            photo: 'file://undefined',
+            photo: 'file://undefined'
         }
 
     }
 
     static navigationOptions = {
+<<<<<<< HEAD
         headerTitleStyle: {
             textAlign: "center",
             flex: 1
         },
         title: 'AgroPost',
+=======
+        // headerTitleStyle: {
+        //     textAlign: "center",
+        //     flex: 1
+        // },
+        // title: 'AgroPost',
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
     };
     toggleNewPostModal = () => {
-        this.setState({ isNewPostModalVisible: !this.state.isNewPostModalVisible });
+        this.setState({isNewPostModalVisible: !this.state.isNewPostModalVisible});
     };
     updateSize = (height) => {
         this.setState({
             height
         });
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
     openCamera() {
         // Launch Camera:
         ImagePicker.launchCamera(options, (response) => {
@@ -60,7 +82,11 @@ export default class HomeScreen extends Component {
     }
 
     openGallery() {
+<<<<<<< HEAD
         this.setState({ name: uuid.v4() })
+=======
+        this.setState({name: uuid.v4()})
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
@@ -110,6 +136,7 @@ export default class HomeScreen extends Component {
             })
 
     }
+<<<<<<< HEAD
     render() {
         let that = this
         const width = Dimensions.get("window").width;
@@ -117,10 +144,21 @@ export default class HomeScreen extends Component {
         return (
             <View style={styles.container}>
 
+=======
+
+    render() {
+        let that = this
+        const width = Dimensions.get("window").width;
+        const height = Dimensions.get("window").height;
+        return (
+            <View style={styles.container}>
+
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                 <Modal
                     style={styles.modal} isVisible={this.state.isNewPostModalVisible}
                 >
                     <View style={styles.userBar}>
+<<<<<<< HEAD
                         <View style={{ flexDirection: 'row' }}>
                             <Button title="x" onPress={() => { this.toggleNewPostModal() }}>
                                 {/*<Icon name="close" style={{ color: "black", fontSize: 32 }} />*/}
@@ -129,6 +167,18 @@ export default class HomeScreen extends Component {
                         <View style={{ alignItems: "center" }}>
                             <Button onPress={() => this.handlePost()}
                                 title="Post"
+=======
+                        <View style={{flexDirection: 'row'}}>
+                            <Button title="x" onPress={() => {
+                                this.toggleNewPostModal()
+                            }}>
+                                {/*<Icon name="close" style={{ color: "black", fontSize: 32 }} />*/}
+                            </Button>
+                        </View>
+                        <View style={{alignItems: "center"}}>
+                            <Button onPress={() => this.handlePost()}
+                                    title="Post"
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                             />
                         </View>
 
@@ -136,6 +186,7 @@ export default class HomeScreen extends Component {
 
                     <ScrollView>
                         <View style={styles.userBar}>
+<<<<<<< HEAD
                             <View style={{ flexDirection: 'row' }}>
                                 <Image
                                     source={{ uri: "https://lh4.googleusercontent.com/-nxzWnbmf4S0/AAAAAAAAAAI/AAAAAAAAABc/eXuoqHhvASM/photo.jpg" }}
@@ -144,6 +195,16 @@ export default class HomeScreen extends Component {
                             </View>
                             <View style={{ alignItems: "center" }}>
                                 <Text style={{ fontSize: 30 }}>...</Text>
+=======
+                            <View style={{flexDirection: 'row'}}>
+                                <Image
+                                    source={{uri: "https://lh4.googleusercontent.com/-nxzWnbmf4S0/AAAAAAAAAAI/AAAAAAAAABc/eXuoqHhvASM/photo.jpg"}}
+                                    style={styles.userImage}
+                                />
+                            </View>
+                            <View style={{alignItems: "center"}}>
+                                <Text style={{fontSize: 30}}>...</Text>
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                             </View>
                         </View>
 
@@ -152,7 +213,11 @@ export default class HomeScreen extends Component {
                                 style={styles.input}
                                 height={this.state.height}
                                 multiline={true}
+<<<<<<< HEAD
                                 onChangeText={text => this.setState({ newPostText: text })}
+=======
+                                onChangeText={text => this.setState({newPostText: text})}
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                                 placeholder={"Write something ..."}
                                 numberOfLines={3}
                                 onContentSizeChange={(e) => this.updateSize(e.nativeEvent.contentSize.height)}
@@ -161,14 +226,25 @@ export default class HomeScreen extends Component {
                         <TouchableOpacity onPress={() => this.openGallery()}><Image
                             source={this.state.photo === 'file://undefined'
                                 ? require('../assets/images/imageThumbnail.jpg')
+<<<<<<< HEAD
                                 : { uri: this.state.photo }}
+=======
+                                : {uri: this.state.photo}}
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                             style={styles.postImage}
                         /></TouchableOpacity>
 
                     </ScrollView>
                     <View style={styles.modalFooter}>
+<<<<<<< HEAD
                         <View style={{ flexDirection: 'row' }}>
                             <Button title="ClickImage" onPress={() => { this.openCamera() }}>
+=======
+                        <View style={{flexDirection: 'row'}}>
+                            <Button title="ClickImage" onPress={() => {
+                                this.openCamera()
+                            }}>
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                                 {/*<Icon name="ios-image" />*/}
                             </Button>
                         </View>
@@ -178,7 +254,11 @@ export default class HomeScreen extends Component {
                 {/*<View style={styles.navBar}>*/}
                 {/*  <Text>AgroPost</Text>*/}
                 {/*</View>*/}
+<<<<<<< HEAD
                 <PostFeed navigation={that.props.navigation} />
+=======
+                <PostFeed navigation={that.props.navigation}/>
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                 {/*new post button*/}
                 <TouchableOpacity
                     style={{
@@ -186,7 +266,13 @@ export default class HomeScreen extends Component {
                         top: height / 1.55,
                         left: width / 1.3
                     }}
+<<<<<<< HEAD
                     onPress={() => { this.toggleNewPostModal() }}>
+=======
+                    onPress={() => {
+                        this.toggleNewPostModal()
+                    }}>
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                     <View
                         style={{
                             height: 60,
@@ -197,9 +283,15 @@ export default class HomeScreen extends Component {
                             justifyContent: "center"
                         }}
                     ><Image
+<<<<<<< HEAD
                             style={{ height: 30, width: 30 }}
                             source={require("../assets/images/icons/tweet.png")}
                         />
+=======
+                        style={{height: 30, width: 30}}
+                        source={require("../assets/images/icons/tweet.png")}
+                    />
+>>>>>>> 5d1d7fa2bfc64588f19e541bcdd0f2c6013af5f8
                     </View>
                 </TouchableOpacity>
             </View>
