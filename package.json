@@ -7,7 +7,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@react-native-community/netinfo": "^4.1.4",
+    "@react-native-community/netinfo": "^3.3.0-reachability.4",
     "emoji-regex": "^8.0.0",
     "moment": "^2.24.0",
     "react": "16.8.3",
