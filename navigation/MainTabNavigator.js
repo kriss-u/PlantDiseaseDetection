@@ -1,4 +1,4 @@
-import {Platform} from 'react-native';
+import {Platform, Button, TouchableNativeFeedback, View} from 'react-native';
 import {createBottomTabNavigator, createStackNavigator, createSwitchNavigator} from 'react-navigation';
 import React from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -59,7 +59,8 @@ const CameraStack = createStackNavigator({
         Output: OutputScreen,
     }, {
         defaultNavigationOptions: {
-            title: 'Leafnosis'
+            title: 'Leafnosis',
+            headerPressColorAndroid: "#009900"
         }
     }
     /*{
@@ -68,7 +69,8 @@ const CameraStack = createStackNavigator({
             headerVisible: false,
         }
     }*/
-);
+    )
+;
 
 CameraStack.navigationOptions = {
     tabBarLabel: 'Diagnose',

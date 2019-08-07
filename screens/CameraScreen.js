@@ -1,5 +1,15 @@
 import React, {Component} from 'react';
-import {Button, Platform, StyleSheet, View, Text, PermissionsAndroid} from 'react-native';
+import {
+    PermissionsAndroid,
+    Platform,
+    StyleSheet,
+    Text,
+    View,
+    TouchableNativeFeedback,
+    TouchableHighlight,
+    TouchableOpacity,
+    TouchableWithoutFeedback
+} from 'react-native';
 import ImagePicker from "react-native-image-picker";
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import Ionicon from 'react-native-vector-icons/Ionicons';
@@ -117,38 +127,52 @@ export default class CameraScreen extends Component {
         return (
             <View style={styles.container}>
                 <View style={styles.photoOption}>
-                    <View style={styles.cameraButtonView}>
-                        <Icon
-                            name="camera"
-                            color="black"
-                            onPress={() => this.openCamera()}
-                            size={60}
-                        />
-                        <Text>Open Camera</Text>
-                    </View>
-                    <View style={styles.galleryButtonView}>
-                        <Ionicon
-                            name="md-photos"
-                            color="black"
-                            onPress={() => this.openGallery()}
-                            size={60}
-                        />
-                        <Text>Open Gallery</Text>
-
-                    </View>
-                </View>
-                <View style={styles.modelButtonView}>
-                    <Ionicon.Button
-                        name="md-download"
-                        color="white"
-                        backgroundColor="#009900"
-                        borderRadius={10}
-                        size={60}
-                        onPress={() => this.navigateToDownload()}
+                    <TouchableNativeFeedback
+                        onPress={() => this.openCamera()}
+                        background={TouchableNativeFeedback.Ripple('#009900')}
                     >
-                        Download Models for Known Species
-                    </Ionicon.Button>
+                        <View style={styles.cameraButtonView}>
+                            <Icon
+                                name="camera"
+                                color="black"
+
+                                size={60}
+                            />
+                            <Text>Open Camera</Text>
+                        </View>
+                    </TouchableNativeFeedback>
+                    <TouchableNativeFeedback
+                        onPress={() => this.openGallery()}
+                        background={TouchableNativeFeedback.Ripple('#009900')}
+                    >
+
+                        <View style={styles.galleryButtonView}>
+                            <Ionicon
+                                name="md-photos"
+                                color="black"
+                                size={60}
+                            />
+                            <Text>Open Gallery</Text>
+                        </View>
+                    </TouchableNativeFeedback>
                 </View>
+                <TouchableNativeFeedback
+                    onPress={() => this.navigateToDownload()}
+                    background={TouchableNativeFeedback.Ripple('#009900')}
+                >
+                    <View style={styles.modelButtonView}>
+                        <Ionicon.Button
+                            name="md-download"
+                            color="white"
+                            backgroundColor="#009900"
+                            borderRadius={10}
+                            size={60}
+                            onPress={() => this.navigateToDownload()}
+                        >
+                            Download Models for Known Species
+                        </Ionicon.Button>
+                    </View>
+                </TouchableNativeFeedback>
             </View>
         )
     }
