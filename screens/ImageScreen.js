@@ -177,12 +177,8 @@ export default class ImageScreen extends Component {
             //If response is in json then in success
             .then((responseJson) => {
                 //Success
-                // console.log(JSON.stringify(res0Json))
-                let response = [
-                    ["Juniper-apple Rust", 0.914, ["Apple", 0.41]],
-                    [2, 0.816, ["Mango", 0.921]],
-                    [1, 0.904, ["Banana", 0.821]]
-                ]
+                // console.log(responseJson)
+                let response = responseJson
                 let array = []
                 response.forEach(data => {
                     let object = {}
