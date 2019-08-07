@@ -1,16 +1,18 @@
 import React, {Component} from 'react';
-import {StyleSheet, Button, View, Platform} from 'react-native';
-import ImagePicker from "react-native-image-picker"
+import {Button, Platform, StyleSheet, View, Text} from 'react-native';
+import ImagePicker from "react-native-image-picker";
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import Ionicon from 'react-native-vector-icons/Ionicons';
 import uuid from 'uuid';
 
 const options = {
-      storageOptions: {
+    storageOptions: {
         skipBackup: true,
         path: 'images',
     },
 };
 export default class CameraScreen extends Component {
-     openCamera(){
+    openCamera() {
         // Launch Camera:
         ImagePicker.launchCamera(options, (response) => {
             let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
@@ -18,7 +20,7 @@ export default class CameraScreen extends Component {
             this.setState({
                 photo: source,
             })
-            if(path!=='file://undefined') {
+            if (path !== 'file://undefined') {
                 const {navigate} = this.props.navigation;
                 navigate('Imagee',
                     {photoss: this.state.photo});
@@ -26,8 +28,8 @@ export default class CameraScreen extends Component {
         });
     }
 
-     openGallery(){
-         this.setState({name: uuid.v4()})
+    openGallery() {
+        this.setState({name: uuid.v4()})
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
@@ -36,44 +38,85 @@ export default class CameraScreen extends Component {
             this.setState({
                 photo: source,
             })
-            if(path!=='file://undefined'){
-            const {navigate} = this.props.navigation;
-            navigate('Imagee',
-                { photoss: this.state.photo});}
+            if (path !== 'file://undefined') {
+                const {navigate} = this.props.navigation;
+                navigate('Imagee',
+                    {photoss: this.state.photo});
+            }
         });
     }
-    navigateToDownload(){
-         const  {navigate} = this.props.navigation;
+
+    navigateToDownload() {
+        const {navigate} = this.props.navigation;
         navigate('DownloadModels')
     }
 
 
     render() {
-            return (
-                <View>
-                    <Button title="Camera" onPress={() => this.openCamera()}/>
-                    <Button title="Gallery" onPress={() => this.openGallery()}/>
-                    <Button title="Download Models for offline use" onPress={() => this.navigateToDownload() }/>
+        return (
+            <View style={styles.container}>
+                <View style={styles.photoOption}>
+                    <View style={styles.cameraButtonView}>
+                        <Icon
+                            name="camera"
+                            color="black"
+                            onPress={() => this.openCamera()}
+                            size={60}
+                        />
+                        <Text>Open Camera</Text>
+                    </View>
+                    <View style={styles.galleryButtonView}>
+                        <Ionicon
+                            name="md-photos"
+                            color="black"
+                            onPress={() => this.openGallery()}
+                            size={60}
+                        />
+                        <Text>Open Gallery</Text>
 
+                    </View>
                 </View>
-        )               
+                <View style={styles.modelButtonView}>
+                    <Ionicon.Button
+                        name="md-download"
+                        color="white"
+                        backgroundColor="#009900"
+                        borderRadius={10}
+                        size={60}
+                        onPress={() => this.navigateToDownload()}
+                    >
+                        Download Models for Known Species
+                    </Ionicon.Button>
+                </View>
+            </View>
+        )
     }
 };
-const  styles = StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // verticalAlign: 'center'
+        // paddingTop: '50%'
+        // backgroundColor: '#fff',
     },
-    camera: {
+    content: {
         flex: 1,
-        justifyContent: 'space-between',
+        // padding: 20
     },
-    bottomBar: {
-        paddingBottom: 0,
-        backgroundColor: 'transparent',
-        alignSelf: 'flex-end',
-        justifyContent: 'space-between',
-        flex: 0.12,
+    photoOption: {
         flexDirection: 'row',
+        padding: 50,
+        justifyContent: 'space-between'
     },
+    cameraButtonView: {
+        padding: 50,
+    },
+    galleryButtonView: {
+        padding: 50,
+    },
+    modelButtonView: {
+        padding: 50,
+    }
 });

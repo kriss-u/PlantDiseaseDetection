@@ -24,12 +24,12 @@ const options = {
     },
 };
 export default class HomeScreen extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
             isNewPostModalVisible: false,
             textInputHeight: 40,
-            photo: 'file://undefined',
+            photo: 'file://undefined'
         }
 
     }

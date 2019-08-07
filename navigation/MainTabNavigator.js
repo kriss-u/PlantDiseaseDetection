@@ -57,6 +57,10 @@ const CameraStack = createStackNavigator({
         Imagee: ImageScreen,
         DownloadModels: ModelsDownloadScreen,
         Output: OutputScreen,
+    }, {
+        defaultNavigationOptions: {
+            title: 'Leafnosis'
+        }
     }
     /*{
         headerMode: 'none',
