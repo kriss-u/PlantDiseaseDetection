@@ -69,14 +69,25 @@ export default class ImageScreen extends Component {
             this.setState({ species: "unknown", modelName: "unknown" })
         }
     };
-    getDownloadedModelsList = () => {
+    getDownloadedModelsList = async () => {
+        try {
+            const value = await AsyncStorage.getItem('_Apple');
+            if (value !== null) {
+                // We have data!!
+                console.log(JSON.parse(value));
+            }
+        } catch (error) {
+            // Error retrieving data
+        }
         try {
             AsyncStorage.getAllKeys((err, keys) => {
                 AsyncStorage.multiGet(keys, (err, stores) => {
+                    console.log(stores)
                     stores.map((result, i, store) => {
                         // get at each store's value so you can work with it
                         let value = JSON.parse(store[i][1]);
-                        this.arrayholder.push(value);
+                        if(value.name!==undefined){
+                        this.arrayholder.push(value);}
                     });
                 });
             });

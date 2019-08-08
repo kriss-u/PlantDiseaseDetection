@@ -135,7 +135,18 @@ export default class DownloadableModels extends Component {
         });
         this.downloadLabel(item);
         this.downloadModel(item);
-    };
+        //save the data related to species
+        let ref = firebase.database().ref("species/");
+        let query = ref.orderByChild("common_name")
+            .equalTo(item.name)
+        query.on("value", (snapshot) => {
+            console.log(snapshot)
+            AsyncStorage.clear()
+
+            AsyncStorage.setItem(`_${item.name}`, JSON.stringify(snapshot._value));
+
+        })
+        };
 
     downloadLabel = (item) => {
         if (this.state.isInternetConnected) {
@@ -192,7 +203,6 @@ export default class DownloadableModels extends Component {
 
                     if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                         // complete
-                        // AsyncStorage.clear()
                         AsyncStorage.setItem(`${item.name}`, JSON.stringify(item));
                         this.setState({
                             isDownloadModalVisible: false

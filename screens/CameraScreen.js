@@ -127,7 +127,6 @@ export default class CameraScreen extends Component {
                             <Icon
                                 name="camera"
                                 color="black"
-
                                 size={60}
                             />
                             <Text>Open Camera</Text>

@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import  Icons from '../../constants/Icons'
 import firebase from "react-native-firebase";
+import Icon from 'react-native-vector-icons/EvilIcons';
+
 
 class Post extends Component {
     constructor(props) {
@@ -55,7 +57,7 @@ class Post extends Component {
         let postImage = this.props.item.imageurl
         let nav = this.props.navigation
         let item = this.props.item
-        const upvoteIconColor= (this.state.liked)? 'rgb(251,61,57)':null;
+        const upvoteIconColor= (this.state.liked)? '#009900':null;
         return (
                 <View style={{flex:1, width: 100+"%"}}>
                 <TouchableOpacity
@@ -91,7 +93,11 @@ class Post extends Component {
                         onPress={() =>{
                             this.likeToggled(item);
                         }}>
-                        <Image style={[styles.icon,{tintColor: upvoteIconColor}]} source={Icons.images.upvoteIcon}/>
+                        <Icon
+                            name="like"
+                            color={upvoteIconColor}
+                            size={50}
+                        />
                     </TouchableOpacity>
                    
                 </View>
