@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import {View, Text, StyleSheet, Button, TextInput} from 'react-native';
+import {Input} from "react-native-elements";
 import firebase from 'react-native-firebase';
 import {GoogleSignin} from 'react-native-google-signin';
-
+import IconEntypo from 'react-native-vector-icons/Entypo';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 // import { YellowBox } from 'react-native';
 // import _ from 'lodash';
 // import * as console from "react-native/flow/console";
@@ -17,9 +19,36 @@ import {GoogleSignin} from 'react-native-google-signin';
 
 
 export default class LoginScreen extends Component {
-    state = {email: '', password: '', errorMessage: null}
+    constructor(props) {
+        super(props);
+        this.state = {
+            email: '',
+            password: '',
+            errorMessage: null,
+            isInputNull: true,
+        };
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    /* componentDidMount(){
+
+     }
+
+     componentWillUnmount() {
+     }*/
+
+    handleChange = (type, value) => {
+        this.setState({
+            [type]: value
+        }, () => {
+            this.setState({
+                isInputNull: !this.state.email || !this.state.password
+            })
+        });
+    };
+
     handleLogin = () => {
-        const {email, password} = this.state
+        const {email, password} = this.state;
         firebase
             .auth()
             .signInWithEmailAndPassword(email, password)
@@ -122,7 +151,7 @@ export default class LoginScreen extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Text>Login</Text>
+                {/*<Text>Login</Text>
                 {this.state.errorMessage &&
                 <Text style={{color: 'red'}}>
                     {this.state.errorMessage}
@@ -142,7 +171,43 @@ export default class LoginScreen extends Component {
                     onChangeText={password => this.setState({password})}
                     value={this.state.password}
                 />
-                <Button title="Login" onPress={this.handleLogin}/>
+                */}
+                <Input
+                    placeholder='Email'
+                    autoCapitalize="none"
+                    onChangeText={(value) => this.handleChange('email', value)}
+                    value={this.state.email}
+                    leftIcon={
+                        <IconEntypo
+                            name='email'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
+                    errorStyle={styles.errorStyle}
+                    errorMessage={this.state.errorMessage}
+                />
+                <Input
+                    placeholder='Password'
+                    secureTextEntry
+                    autoCapitalize="none"
+                    onChangeText={(value) => this.handleChange('password', value)}
+                    value={this.state.password}
+                    leftIcon={
+                        <MCIcon
+                            name='textbox-password'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
+                />
+                <Button
+                    title="Login"
+                    disabled={this.state.isInputNull}
+                    onPress={this.handleLogin}
+                />
                 <Button
                     title="Don't have an account? Sign Up"
                     onPress={() => this.props.navigation.navigate('RegisterScreen')}
@@ -159,5 +224,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    errorStyle: {
+        color: 'red'
+    },
+    icon: {
+        paddingLeft: 10,
+        paddingRight: 20
     }
 });

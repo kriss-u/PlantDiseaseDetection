@@ -17,11 +17,11 @@ import NetInfo from "@react-native-community/netinfo";
 
 import * as Progress from 'react-native-progress';
 
-function showInternetConnectedToast() {
+export function showInternetConnectedToast() {
     ToastAndroid.showWithGravity('Internet Connected!', ToastAndroid.SHORT, ToastAndroid.CENTER)
 }
 
-function showNoInternetToast() {
+export function showNoInternetToast() {
     ToastAndroid.showWithGravity('No Internet Connection!', ToastAndroid.SHORT, ToastAndroid.CENTER)
 }
 
@@ -61,11 +61,8 @@ export default class DownloadableModels extends Component {
         }
     }
 
-    componentWillMount() {
-        if (!Array.isArray(this.state.data) || !this.state.data.length && this.state.isInternetConnected) {
-            this.makeRemoteRequest();
-        }
-
+    componentWillUnmount() {
+        NetInfo.removeEventListener('connectionChange');
     }
 
     toggleDownloadModal = () => {
