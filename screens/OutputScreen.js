@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, FlatList, ScrollView } from 'react-native';
 import firebase from "react-native-firebase";
 import NetInfo from "@react-native-community/netinfo";
+import { ListItem, Text } from 'react-native-elements';
 
 export default class OutputScreen extends Component {
     constructor() {
@@ -9,7 +10,11 @@ export default class OutputScreen extends Component {
         this.state = {
             disease: {},
             species: {},
-            isInternetConnected: false
+            isInternetConnected: false,
+            isDescriptionVisible: false,
+            isCauseVisible: false,
+            isControlVisible: false,
+            isSymptomsVisible: false
         };
     }
 
@@ -63,24 +68,213 @@ export default class OutputScreen extends Component {
         this.getDiseaseData()
     }
 
-    render() {
+    toggleDescription = () => {
+        this.setState({
+            isDescriptionVisible: !this.state.isDescriptionVisible
+        })
+    }
+
+    toggleCause = () => {
+        this.setState({
+            isCauseVisible: !this.state.isCauseVisible
+        })
+    }
+
+    toggleControl = () => {
+        this.setState({
+            isControlVisible: !this.state.isControlVisible
+        })
+    }
+
+    toggleSymptoms = () => {
+        this.setState({
+            isSymptomsVisible: !this.state.isSymptomsVisible
+        })
+    }
+
+    renderSeparator = () => {
         return (
-            <View>
-                <Text> Common Name: {this.state.species.common_name} </Text>
-                <Text> Description of the Plant: {this.state.species.description} </Text>
-                <Text>Scientific Name: {this.state.species.scientific_name}</Text>
-                {this.props.navigation.state.params.result.disease !== 'Healthy' ?
-                    <View>
-                        <Text> About Disease: </Text>
-                        <Text> Cause: {this.state.disease.cause}</Text>
-                        <Text>Common Name: {this.state.disease.common_name}</Text>
-                        <Text>Control: {this.state.disease.control}</Text>
-                        <Text>Scientific Name: {this.state.disease.disease_scientific_name}</Text>
-                        <Text>Symptoms: {this.state.disease.symptoms}</Text>
-                    </View> :
-                    <Text> Your Plant is totally healthy</Text>
-                }
-            </View>
+            <View
+                style={{
+                    height: 1,
+                    width: '100%',
+                    backgroundColor: '#CED0CE'
+                }}
+            />
+        );
+    };
+
+    render() {
+        let i = 1;
+        return (
+            <ScrollView>
+                <View>
+                    <FlatList
+                        data={[`${this.state.species.common_name}`]}
+                        renderItem={({ item }) =>
+                            <ListItem
+
+                                title={<Text h2>About Species:</Text>}
+                            ></ListItem>}
+                        keyExtractor={item => item}
+                    />
+
+                    {this.renderSeparator()}
+                    <FlatList
+                        data={[`${this.state.species.common_name}`]}
+                        renderItem={({ item }) =>
+                            <ListItem
+
+                                title={<Text><Text h4>Common Name: </Text> <Text style={{ fontSize: 20 }}>{item}</Text></Text>}
+                            ></ListItem>}
+                        keyExtractor={item => item}
+                    />
+
+                    {this.renderSeparator()}
+                    <FlatList
+                        data={[`${this.state.species.scientific_name}`]}
+                        renderItem={({ item }) =>
+                            <ListItem
+
+                                title={<Text><Text h4>Scientific Name: </Text><Text style={{ fontSize: 20 }}>{item}</Text></Text>}
+                            ></ListItem>}
+                        keyExtractor={item => item}
+                    />
+
+                    {this.renderSeparator()}
+                    <FlatList
+                        data={[`${this.state.species.description}`]}
+                        renderItem={({ item }) =>
+                            <ListItem
+
+                                title={<Text><Text h4>Description:</Text> <Text style={{ fontSize: 20 }}>(Touch for detail)</Text></Text>}
+                                onPress={() => this.toggleDescription()}
+                            ></ListItem>}
+                        keyExtractor={item => item}
+                    />
+                    {this.state.isDescriptionVisible ? <FlatList
+                        data={[`${this.state.species.description}`]}
+                        renderItem={({ item }) =>
+                            <ListItem
+
+                                title={<Text style={{ fontSize: 20 }}>{item}</Text>}
+                            ></ListItem>}
+                        keyExtractor={item => item}
+                    /> : null}
+                    {this.renderSeparator()}
+                    {this.renderSeparator()}
+                    {
+                        this.props.navigation.state.params.result.disease !== 'Healthy' ?
+                            <View>
+                                <FlatList
+                                    data={[`${this.state.disease.common_name}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text h2>About Disease:</Text>}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.renderSeparator()}
+                                <FlatList
+                                    data={[`${this.state.disease.common_name}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text><Text h4>Common Name:</Text> <Text style={{ fontSize: 20 }}> {item}</Text></Text>}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.renderSeparator()}
+                                <FlatList
+                                    data={[`${this.state.disease.disease_scientific_name}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text><Text h4>Scientific Name:</Text> <Text style={{ fontSize: 20 }}>{item}</Text></Text>}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.renderSeparator()}
+                                <FlatList
+                                    data={[`${this.state.disease.cause}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text><Text h4>Cause:</Text> <Text style={{ fontSize: 20 }}>(Touch for detail)</Text></Text>}
+                                            onPress={() => this.toggleCause()}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.state.isCauseVisible ?
+                                    <FlatList
+                                        data={[`${this.state.disease.cause}`]}
+                                        renderItem={({ item }) =>
+                                            <ListItem
+
+                                                title={<Text style={{ fontSize: 20 }}>{item} </Text>}
+                                            ></ListItem>}
+                                        keyExtractor={item => item}
+                                    /> : null}
+                                {this.renderSeparator()}
+                                <FlatList
+                                    data={[`${this.state.disease.symptoms}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text><Text h4>Symptoms:</Text> <Text style={{ fontSize: 20 }}>(Touch for detail)</Text></Text>}
+                                            onPress={() => this.toggleSymptoms()}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.state.isSymptomsVisible ?
+                                    <FlatList
+                                        data={[`${this.state.disease.symptoms}`]}
+                                        renderItem={({ item }) =>
+                                            <ListItem
+
+                                                title={<Text style={{ fontSize: 20 }}>{item} </Text>}
+                                            ></ListItem>}
+                                        keyExtractor={item => item}
+                                    /> : null}
+                                {this.renderSeparator()}
+                                <FlatList
+                                    data={[`${this.state.disease.control}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text><Text h4>Control:</Text> <Text style={{ fontSize: 20 }}>(Touch for detail)</Text></Text>}
+                                            onPress={() => this.toggleControl()}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.state.isControlVisible ?
+                                    <FlatList
+                                        data={[`${this.state.disease.control}`]}
+                                        renderItem={({ item }) =>
+                                            <ListItem
+
+                                                title={<Text style={{ fontSize: 20 }}>{item} </Text>}
+                                            ></ListItem>}
+                                        keyExtractor={item => item}
+                                    /> : null}
+                                {this.renderSeparator()}
+                            </View> :
+                            <View>
+                                <FlatList
+                                    data={[`${this.state.species.common_name}`]}
+                                    renderItem={({ item }) =>
+                                        <ListItem
+
+                                            title={<Text h2>Your Plant is totally healthy</Text>}
+                                        ></ListItem>}
+                                    keyExtractor={item => item}
+                                />
+                                {this.renderSeparator()}
+                            </View>
+                    }
+                </View >
+            </ScrollView>
         )
     }
 }
