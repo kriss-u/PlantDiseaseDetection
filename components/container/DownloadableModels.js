@@ -249,7 +249,7 @@ export default class DownloadableModels extends Component {
                         }}>
                         <View>
                             <Progress.Circle progress={this.state.downloadProgress} size={200} showsText={true}/>
-                            <Text style={{color: "#FFFF00"}}>Downloading Model {this.state.currentValue}!</Text>
+                            <Text style={{color: "#FFFF00"}}>Downloading Model {this.state.currentItem}!</Text>
 
                         </View>
                     </TouchableNativeFeedback>
