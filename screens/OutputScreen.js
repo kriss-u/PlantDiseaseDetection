@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, ScrollView } from 'react-native';
+import { View, FlatList, ScrollView, AsyncStorage } from 'react-native';
 import firebase from "react-native-firebase";
 import NetInfo from "@react-native-community/netinfo";
 import { ListItem, Text } from 'react-native-elements';
@@ -26,31 +26,22 @@ export default class OutputScreen extends Component {
         })
     }
 
-    getDiseaseData = () => {
+    getDiseaseData = async () => {
         if (this.state.isInternetConnected) {
-            console.log('online')
             let disease = this.props.navigation.state.params.result
             let diseaseDetail
             let species = disease.species
-            // console.log(JSON.stringify(this.props.navigation.state.params.result))
             let ref = firebase.database().ref("species/");
             let query = ref.orderByChild("common_name")
                 .equalTo(species)
             query.on("value", (snapshot) => {
-                // console.log(snapshot)
                 snapshot.forEach((child) => {
-                    console.log(child)
                     if (disease.disease !== 'h') {
                         species = child.val()
                         diseaseDetail = child.val().diseases.filter(function (childDisease) {
                             return childDisease.common_name === disease.disease
                         })
-                        console.log(diseaseDetail)
-                        console.log(species)
-                        // console.log("lol: " + JSON.stringify(diseaseDetail))
                     }
-                    // name = diseaseDetail[0].common_name
-                    // console.log(name)
                     this.setState({
                         disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
                         species: species
@@ -58,10 +49,31 @@ export default class OutputScreen extends Component {
                 });
             });
         } else {
-            console.log('offline')
+            try {
+                let disease = this.props.navigation.state.params.result
+                let diseaseDetail, values
+                let species = disease.species
+                const value = await AsyncStorage.getItem(`_${species}`);
+                values = JSON.parse(value)
+                if (value !== null) {
+                    // We have data!!
+                    values = Object.values(values)
+                    values = values[0]
+                    if (disease.disease !== 'h') {
+                        diseaseDetail = values.diseases.filter(function (childDisease) {
+                            return childDisease.common_name === disease.disease
+                        })
+                    }
+                    this.setState({
+                        species: values,
+                        disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
+                    })
+                }
+            } catch (error) {
+                console.log(error)
+                // Error retrieving data
+            }
         }
-        // console.log(JSON.stringify(this.props.navigation.state.params.result))
-
     }
 
     componentDidMount() {
