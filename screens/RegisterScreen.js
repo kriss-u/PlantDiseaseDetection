@@ -1,77 +1,176 @@
 import React from 'react'
-import { StyleSheet, Text, TextInput, View, Button } from 'react-native'
+import {ScrollView, StyleSheet, View} from 'react-native'
 import firebase from "react-native-firebase";
+import {Input} from "react-native-elements";
+import IconEntypo from "react-native-vector-icons/Entypo";
+import Ionicon from 'react-native-vector-icons/Ionicons';
+import MCIcon from "react-native-vector-icons/MaterialCommunityIcons";
+import FAIcon from "react-native-vector-icons/FontAwesome5";
+
 export default class RegisterScreen extends React.Component {
-    state = { email: '', password: '', errorMessage: null, lastname: '', firstname: '' }
+    constructor(props) {
+        super(props);
+        this.state = {
+            email: '',
+            password: '',
+            rePassword: '',
+            errorMessage: null,
+            passwordMismatchMessage: null,
+            firstName: '',
+            lastName: '',
+            isInputWrong: true,
+        };
+        this.handleChange = this.handleChange.bind(this);
+    }
+
     handleSignUp = () => {
-        //save the context outside the .then fucntion
-        let that = this
+        //save the context outside the .then function
+        let that = this;
         firebase
             .auth()
             .createUserWithEmailAndPassword(this.state.email, this.state.password)
-            .then(function(result) {
-                console.log('result',result);
-                    firebase
-                        .database()
-                        .ref('/users/' + result.user.uid)
-                        .set({
-                            // profile_picture: result.user.picture,
-                            email: that.state.email,
-                            firstname: that.state.firstname,
-                            lastname: that.state.lastname,
-                            created_at: Date.now()
-                        })
-                        .then(function() {
-                            this.props.navigation.navigate('ProfilesScreen');
-                        })
+            .then(function (result) {
+                firebase
+                    .database()
+                    .ref('/users/' + result.user.uid)
+                    .set({
+                        // profile_picture: result.user.picture,
+                        email: that.state.email,
+                        firstname: that.state.firstName,
+                        lastname: that.state.lastName,
+                        created_at: Date.now()
+                    })
+                    .then(function () {
+                        this.props.navigation.navigate('ProfilesScreen');
+                    })
             })
-            .catch(error => this.setState({ errorMessage: error.message }))
-    }
+            .catch(error => this.setState({errorMessage: error.message}))
+    };
 
+    handleChange = (type, value) => {
+        this.setState({
+            [type]: value
+        }, () => {
+            let isMismatchPassword = this.state.rePassword !== this.state.password;
+            this.setState({
+                isInputWrong: !this.state.email || !this.state.password || !this.state.firstName || !this.state.lastName || isMismatchPassword,
+            });
+        });
+    };
 
     render() {
         return (
-            <View style={styles.container}>
-                <Text>Sign Up</Text>
-                {this.state.errorMessage &&
-                <Text style={{ color: 'red' }}>
-                    {this.state.errorMessage}
-                </Text>}
-                <TextInput
-                    placeholder="Email"
+            <ScrollView
+                contentContainerStyle={{
+                    paddingTop: 40,
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
+                <Input
+                    placeholder='Enter your first name here...'
+                    autoCapitalize="words"
+                    label='First Name'
+                    containerStyle={styles.input}
+                    onChangeText={(value) => this.handleChange('firstName', value)}
+                    value={this.state.firstName}
+                    leftIcon={
+                        <Ionicon
+                            name='md-person'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
+                />
+                <Input
+                    placeholder='Enter your last name here...'
+                    autoCapitalize="words"
+                    label='Last Name'
+                    containerStyle={styles.input}
+                    onChangeText={(value) => this.handleChange('lastName', value)}
+                    value={this.state.lastName}
+                    leftIcon={
+                        <Ionicon
+                            name='md-person'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
+                />
+                <Input
+                    placeholder='Enter your email here...'
                     autoCapitalize="none"
-                    style={styles.textInput}
-                    onChangeText={email => this.setState({ email })}
+                    label='Email'
+                    containerStyle={styles.input}
+                    onChangeText={(value) => this.handleChange('email', value)}
                     value={this.state.email}
+                    leftIcon={
+                        <IconEntypo
+                            name='email'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
+                    errorStyle={styles.errorStyle}
+                    errorMessage={this.state.errorMessage}
                 />
-                <TextInput
+                <Input
+                    placeholder='Enter a password...'
                     secureTextEntry
-                    placeholder="Password"
+                    label='Password'
+                    containerStyle={styles.input}
                     autoCapitalize="none"
-                    style={styles.textInput}
-                    onChangeText={password => this.setState({ password })}
+                    onChangeText={(value) => this.handleChange('password', value)}
                     value={this.state.password}
+                    leftIcon={
+                        <MCIcon
+                            name='textbox-password'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
                 />
-                <TextInput
-                    placeholder="Firstname"
+                <Input
+                    placeholder='Confirm your password...'
+                    secureTextEntry
+                    label='Confirm Password'
+                    containerStyle={styles.input}
                     autoCapitalize="none"
-                    style={styles.textInput}
-                    onChangeText={firstname => this.setState({ firstname })}
-                    value={this.state.firstname}
+                    onChangeText={(value) => this.handleChange('rePassword', value)}
+                    value={this.state.rePassword}
+                    leftIcon={
+                        <MCIcon
+                            name='textbox-password'
+                            size={24}
+                            color='#009900'
+                            style={styles.icon}
+                        />
+                    }
                 />
-                <TextInput
-                    placeholder="Lastname"
-                    autoCapitalize="none"
-                    style={styles.textInput}
-                    onChangeText={lastname => this.setState({ lastname })}
-                    value={this.state.lastname}
-                />
-                <Button title="Sign Up" onPress={this.handleSignUp} />
-                <Button
-                    title="Already have an account? Login"
-                    onPress={() => this.props.navigation.navigate('LoginScreen')}
-                />
-            </View>
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name='user-plus'
+                        disabled={this.state.isInputWrong}
+                        onPress={this.handleSignUp}
+                        backgroundColor={this.state.isInputWrong ? '#d3d3d3' : '#009900'}
+                    >
+                        Create a New Account
+                    </FAIcon.Button>
+                </View>
+
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name='user-check'
+                        backgroundColor='#076C91'
+                        onPress={() => this.props.navigation.navigate('LoginScreen')}
+                    >
+                        Already have an account? Login!
+                    </FAIcon.Button>
+                </View>
+            </ScrollView>
         )
     }
 }
@@ -81,11 +180,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    input: {
+        paddingBottom: 30,
+        paddingHorizontal: 30,
+    },
     textInput: {
         height: 40,
         width: '90%',
         borderColor: 'gray',
         borderWidth: 1,
         marginTop: 8
+    },
+    errorStyle: {
+        color: 'red'
+    },
+    icon: {
+        paddingRight: 10
+    },
+    button: {
+        padding: 10
     }
-})
+});

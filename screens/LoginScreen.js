@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, TouchableNativeFeedback, ScrollView} from 'react-native';
+import {View, Text, StyleSheet, Button, TouchableNativeFeedback, ScrollView, ToastAndroid} from 'react-native';
 import {Input} from "react-native-elements";
 import firebase from 'react-native-firebase';
 import {GoogleSignin} from 'react-native-google-signin';
@@ -59,16 +59,12 @@ export default class LoginScreen extends Component {
     };
 
     onSignIn = credential => {
-        console.log('Credential', credential);
         // Sign in with credential from the Google user.
         firebase
             .auth()
             .signInWithCredential(credential)
             .then(function (result) {
-                console.log('result', result);
                 if (result.additionalUserInfo.isNewUser) {
-                    console.log("the use is not signed up")
-                    console.log(result.user.uid);
                     firebase
                         .database()
                         .ref('/users/' + result.user.uid)
@@ -81,9 +77,6 @@ export default class LoginScreen extends Component {
                             phone: result.user.phoneNumber,
                             created_at: Date.now()
                         })
-                        .then(function (snapshot) {
-                            console.log('Snapshot', snapshot);
-                        });
                 } else {
                     firebase
                         .database()
@@ -94,29 +87,18 @@ export default class LoginScreen extends Component {
                 }
             })
             .catch(function (error) {
-                // Handle Errors here.
-                let errorCode = error.code;
-                let errorMessage = error.message;
-                // The email of the user's account used.
-                let email = error.email;
-                // The firebase.auth.AuthCredential type that was used.
-                let credential = error.credential;
+                ToastAndroid.showWithGravity(`Error: ${error.message}`, ToastAndroid.SHORT, ToastAndroid.BOTTOM)
             })
     };
 
     signInWithGoogleAsync = async () => {
         try {
-            console.log('result');
-
-
             await GoogleSignin.configure();
-            const userInfo = await GoogleSignin.signIn();
-            console.log(userInfo);
+            await GoogleSignin.signIn();
             const result = await GoogleSignin.getTokens();
-            console.log(result);
 
 
-// Build Firebase credential with the Google ID token.
+            // Build Firebase credential with the Google ID token.
             const credential = firebase.auth.GoogleAuthProvider.credential(
                 result.idToken,
                 result.accessToken
@@ -125,31 +107,30 @@ export default class LoginScreen extends Component {
             return result.accessToken;
 
         } catch (e) {
-            console.warn('error');
-            return {error: true};
+            ToastAndroid.showWithGravity('Something is wrong', ToastAndroid.SHORT, ToastAndroid.BOTTOM)
         }
     };
 
-    async signInWithFacebookAsync() {
+    /* async signInWithFacebookAsync() {
 
-        try {
-            await GoogleSignin.revokeAccess();
-            await GoogleSignin.signOut();
-            this.setState({user: null}); // Remember to remove the user from your app's state as well
-        } catch (error) {
-            console.error(error);
-        }
-        const {type, token} = await Expo.Facebook.logInWithReadPermissionsAsync('2289708561085828'
-            , {permissions: ['public_profile']});
+         try {
+             await GoogleSignin.revokeAccess();
+             await GoogleSignin.signOut();
+             this.setState({user: null}); // Remember to remove the user from your app's state as well
+         } catch (error) {
+             console.error(error);
+         }
+         const {type, token} = await Expo.Facebook.logInWithReadPermissionsAsync('2289708561085828'
+             , {permissions: ['public_profile']});
 
-        if (type === 'success') {
-            // Build Firebase credential with the Facebook ID token.
-            const credential = firebase.auth.FacebookAuthProvider.credential(token);
-            this.onSignIn(credential);
+         if (type === 'success') {
+             // Build Firebase credential with the Facebook ID token.
+             const credential = firebase.auth.FacebookAuthProvider.credential(token);
+             this.onSignIn(credential);
 
-        }
-    }
-
+         }
+     }
+ */
     render() {
         return (
             <ScrollView
@@ -199,7 +180,7 @@ export default class LoginScreen extends Component {
                         name='sign-in-alt'
                         disabled={this.state.isInputNull}
                         onPress={this.handleLogin}
-                        backgroundColor={this.state.isInputNull ? 'red' : '#009900'}
+                        backgroundColor={this.state.isInputNull ? '#d3d3d3' : '#009900'}
                     >
                         Login
                     </FAIcon.Button>
@@ -208,7 +189,7 @@ export default class LoginScreen extends Component {
                 <View style={styles.button}>
                     <FAIcon.Button
                         name='user-plus'
-                        backgroundColor='#24292E'
+                        backgroundColor='#076C91'
                         onPress={() => this.props.navigation.navigate('RegisterScreen')}
                     >
                         Don't have an account? Sign Up!
@@ -222,7 +203,7 @@ export default class LoginScreen extends Component {
                     > Sign In with Google
                     </FAIcon.Button>
                 </View>
-                <View style={styles.button}>
+                {/* <View style={styles.button}>
                     <FAIcon.Button
                         name="facebook"
                         backgroundColor='#2E4B92'
@@ -231,7 +212,7 @@ export default class LoginScreen extends Component {
                         Sign In with Facebook
                     </FAIcon.Button>
                 </View>
-
+                */}
             </ScrollView>
         );
     }

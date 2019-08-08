@@ -60,7 +60,7 @@ export default class ImageScreen extends Component {
 
     toggleChecked = () => {
         this.setState({checked: !this.state.checked})
-    }
+    };
 
     toggleSpeciesSelectionModal = () => {
         if (this.state.checked === false || this.state.isSpeciesSelectionModalVisible === true) {
