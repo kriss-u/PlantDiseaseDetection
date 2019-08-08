@@ -203,7 +203,11 @@ export default class ImageScreen extends Component {
                 response.forEach(data => {
                     let object = {}
                     object.species = data[2][0]
-                    object.disease = data[0]
+                    if (data[0] === "h") {
+                        object.disease = "Healthy"
+                    } else {
+                        object.disease = data[0]
+                    }
                     object.diseaseConfidence = data[1]
                     object.speciesConfidence = data[2][1]
                     array.push(object)
@@ -250,27 +254,23 @@ export default class ImageScreen extends Component {
             (err, res) => {
                 if (err)
                     console.log(err);
-                else
-                    res.map((res) => {
-                        let name
-
-                        let ref = firebase.database().ref("species/");
-                        let query = ref.orderByChild("common_name")
-                            .equalTo(this.state.species)
-                        query.on("value", function (snapshot) {
-                            snapshot.forEach(function (child) {
-                                if (res.label !== 'h') {
-                                    var diseaseDetail = child.val().diseases.filter(function (disease) {
-                                        return disease.id === res.label
-                                    })
-                                }
-                                name = diseaseDetail[0].common_name
-                                console.log(name);
-                            });
-                        });
-
-                        alert(name + ':' + res.confidence)
+                else {
+                    let array = []
+                    console.log(res)
+                    res.forEach((res) => {
+                        let object = {}
+                        object.disease = (res.label === "h" ? "Healthy" : res.label)
+                        object.species = this.state.modelName.split('_')[0]
+                        object.speciesConfidence = 1
+                        object.diseaseConfidence = res.confidence
+                        array.push(object)
+                        // console.log(res)
                     })
+                    this.setState({
+                        diseaseData: array
+                    })
+                    this.toggleDiseaseModal()
+                }
             });
 
     }
