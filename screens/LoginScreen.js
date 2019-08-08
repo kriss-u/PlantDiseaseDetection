@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
-import {View, Text, StyleSheet, Button, TextInput} from 'react-native';
+import {View, Text, StyleSheet, Button, TouchableNativeFeedback, ScrollView} from 'react-native';
 import {Input} from "react-native-elements";
 import firebase from 'react-native-firebase';
 import {GoogleSignin} from 'react-native-google-signin';
 import IconEntypo from 'react-native-vector-icons/Entypo';
-import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FAIcon from 'react-native-vector-icons/FontAwesome5';
+import IonIcon from "react-native-vector-icons/Ionicons";
 // import { YellowBox } from 'react-native';
 // import _ from 'lodash';
 // import * as console from "react-native/flow/console";
@@ -150,31 +152,17 @@ export default class LoginScreen extends Component {
 
     render() {
         return (
-            <View style={styles.container}>
-                {/*<Text>Login</Text>
-                {this.state.errorMessage &&
-                <Text style={{color: 'red'}}>
-                    {this.state.errorMessage}
-                </Text>}
-                <TextInput
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    placeholder="Email"
-                    onChangeText={email => this.setState({email})}
-                    value={this.state.email}
-                />
-                <TextInput
-                    secureTextEntry
-                    style={styles.textInput}
-                    autoCapitalize="none"
-                    placeholder="Password"
-                    onChangeText={password => this.setState({password})}
-                    value={this.state.password}
-                />
-                */}
+            <ScrollView
+                contentContainerStyle={{
+                    paddingTop: 40,
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
                 <Input
-                    placeholder='Email'
+                    placeholder='Enter your email here...'
                     autoCapitalize="none"
+                    label='Email'
+                    containerStyle={styles.input}
                     onChangeText={(value) => this.handleChange('email', value)}
                     value={this.state.email}
                     leftIcon={
@@ -189,8 +177,10 @@ export default class LoginScreen extends Component {
                     errorMessage={this.state.errorMessage}
                 />
                 <Input
-                    placeholder='Password'
+                    placeholder='Enter your password here...'
                     secureTextEntry
+                    label='Password'
+                    containerStyle={styles.input}
                     autoCapitalize="none"
                     onChangeText={(value) => this.handleChange('password', value)}
                     value={this.state.password}
@@ -203,18 +193,46 @@ export default class LoginScreen extends Component {
                         />
                     }
                 />
-                <Button
-                    title="Login"
-                    disabled={this.state.isInputNull}
-                    onPress={this.handleLogin}
-                />
-                <Button
-                    title="Don't have an account? Sign Up"
-                    onPress={() => this.props.navigation.navigate('RegisterScreen')}
-                />
-                <Button title="Sign In with Google" onPress={() => this.signInWithGoogleAsync()}/>
-                <Button title="Sign In with Facebook" onPress={() => this.signInWithFacebookAsync()}/>
-            </View>
+
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name='sign-in-alt'
+                        disabled={this.state.isInputNull}
+                        onPress={this.handleLogin}
+                        backgroundColor={this.state.isInputNull ? 'red' : '#009900'}
+                    >
+                        Login
+                    </FAIcon.Button>
+                </View>
+
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name='user-plus'
+                        backgroundColor='#24292E'
+                        onPress={() => this.props.navigation.navigate('RegisterScreen')}
+                    >
+                        Don't have an account? Sign Up!
+                    </FAIcon.Button>
+                </View>
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name="google"
+                        backgroundColor='#DD4B39'
+                        onPress={() => this.signInWithGoogleAsync()}
+                    > Sign In with Google
+                    </FAIcon.Button>
+                </View>
+                <View style={styles.button}>
+                    <FAIcon.Button
+                        name="facebook"
+                        backgroundColor='#2E4B92'
+                        onPress={() => this.signInWithFacebookAsync()}
+                    >
+                        Sign In with Facebook
+                    </FAIcon.Button>
+                </View>
+
+            </ScrollView>
         );
     }
 }
@@ -222,14 +240,35 @@ export default class LoginScreen extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center'
+    },
+    inputContainers: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    buttonContainers: {
+        flex: 2,
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    buttonContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     errorStyle: {
         color: 'red'
     },
     icon: {
-        paddingLeft: 10,
-        paddingRight: 20
+        paddingRight: 10
+    },
+    input: {
+        paddingBottom: 30,
+        paddingHorizontal: 30,
+    },
+    button: {
+        padding: 10
     }
 });
