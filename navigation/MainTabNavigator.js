@@ -1,5 +1,5 @@
-import {Platform, Button, TouchableNativeFeedback, View} from 'react-native';
-import {createBottomTabNavigator, createStackNavigator, createSwitchNavigator} from 'react-navigation';
+import { Platform, Button, TouchableNativeFeedback, View } from 'react-native';
+import { createBottomTabNavigator, createStackNavigator, createSwitchNavigator } from 'react-navigation';
 import React from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -23,10 +23,10 @@ const COLORS = {
 }
 
 const HomeStack = createStackNavigator({
-        Home: HomeScreen,
-        ProfilesScreen: ProfilesScreen,
-        PostScreen: PostScreen,
-    }, {
+    Home: HomeScreen,
+    ProfilesScreen: ProfilesScreen,
+    PostScreen: PostScreen,
+}, {
         defaultNavigationOptions: {
             title: 'Leafnosis'
         }
@@ -41,7 +41,7 @@ const HomeStack = createStackNavigator({
 
 HomeStack.navigationOptions = {
     tabBarLabel: 'Home',
-    tabBarIcon: ({focused}) => (
+    tabBarIcon: ({ focused }) => (
         <Icon
             focused={focused}
             name={Platform.OS === 'ios' ? 'ios-home' : 'md-home'}
@@ -53,11 +53,11 @@ HomeStack.navigationOptions = {
 
 
 const CameraStack = createStackNavigator({
-        Camera: CameraScreen,
-        Imagee: ImageScreen,
-        DownloadModels: ModelsDownloadScreen,
-        Output: OutputScreen,
-    }, {
+    Camera: CameraScreen,
+    Imagee: ImageScreen,
+    DownloadModels: ModelsDownloadScreen,
+    Output: OutputScreen,
+}, {
         defaultNavigationOptions: {
             title: 'Leafnosis',
             headerPressColorAndroid: "#009900"
@@ -69,12 +69,12 @@ const CameraStack = createStackNavigator({
             headerVisible: false,
         }
     }*/
-    )
-;
+)
+    ;
 
 CameraStack.navigationOptions = {
     tabBarLabel: 'Diagnose',
-    tabBarIcon: ({focused}) => (
+    tabBarIcon: ({ focused }) => (
 
         <Icon
             focused={focused}
@@ -87,12 +87,12 @@ CameraStack.navigationOptions = {
 
 
 const UsersStack = createSwitchNavigator({
-        user: userScreen,
-        LoginScreen: LoginScreen,
-        RegisterScreen: RegisterScreen,
-        ProfilesScreen: ProfilesScreen,
+    user: userScreen,
+    LoginScreen: LoginScreen,
+    RegisterScreen: RegisterScreen,
+    ProfilesScreen: ProfilesScreen,
 
-    }
+}
     /*{
         headerMode: 'none',
         navigationOptions: {
@@ -103,7 +103,7 @@ const UsersStack = createSwitchNavigator({
 
 UsersStack.navigationOptions = {
     tabBarLabel: 'Profile',
-    tabBarIcon: ({focused}) => (
+    tabBarIcon: ({ focused }) => (
         <Icon
             focused={focused}
             name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'}
@@ -120,8 +120,8 @@ export default createBottomTabNavigator({
     UsersStack,
 
 }, {
-    tabBarOptions: {
-        showLabel: false
-    }
-});
+        tabBarOptions: {
+            showLabel: false
+        }
+    });
 

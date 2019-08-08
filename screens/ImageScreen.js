@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Image,
     View,
@@ -8,13 +8,13 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import * as Progress from 'react-native-progress';
-import {CheckBox, ListItem, SearchBar} from 'react-native-elements'
+import { CheckBox, ListItem, SearchBar } from 'react-native-elements'
 import firebase from "react-native-firebase";
 import uuid from 'uuid';
 import Tflite from 'tflite-react-native';
-import {NavigationEvents} from 'react-navigation';
+import { NavigationEvents } from 'react-navigation';
 import NetInfo from "@react-native-community/netinfo";
-import {showInternetConnectedToast, showNoInternetToast} from "../components/container/DownloadableModels";
+import { showInternetConnectedToast, showNoInternetToast } from "../components/container/DownloadableModels";
 
 let tflite = new Tflite();
 
@@ -54,19 +54,19 @@ export default class ImageScreen extends Component {
             }
         });
     }
-    componentWillUnmount(){
+    componentWillUnmount() {
         NetInfo.removeEventListener('connectionChange');
     }
 
     toggleChecked = () => {
-        this.setState({checked: !this.state.checked})
-    };
+        this.setState({ checked: !this.state.checked })
+    }
 
     toggleSpeciesSelectionModal = () => {
         if (this.state.checked === false || this.state.isSpeciesSelectionModalVisible === true) {
-            this.setState({isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible});
+            this.setState({ isSpeciesSelectionModalVisible: !this.state.isSpeciesSelectionModalVisible });
         } else {
-            this.setState({species: "unknown", modelName: "unknown"})
+            this.setState({ species: "unknown", modelName: "unknown" })
         }
     };
     getDownloadedModelsList = () => {
@@ -130,21 +130,22 @@ export default class ImageScreen extends Component {
         );
     };
     toggleUploadModal = () => {
-        this.setState({isUploadModalVisible: !this.state.isUploadModalVisible});
+        this.setState({ isUploadModalVisible: !this.state.isUploadModalVisible });
     };
     togglePredictionModal = () => {
-        this.setState({isPredictionModalVisible: !this.state.isPredictionModalVisible});
+        this.setState({ isPredictionModalVisible: !this.state.isPredictionModalVisible });
     };
     toggleDiseaseModal = () => {
-        this.setState({isDiseaseModalVisible: !this.state.isDiseaseModalVisible});
+        this.setState({ isDiseaseModalVisible: !this.state.isDiseaseModalVisible });
     };
     selectSpecies = (item) => {
-        this.setState({species: `${item.name}`, modelName: `${item.modelName}`})
+        this.setState({ species: `${item.name}`, modelName: `${item.modelName}` })
         this.toggleSpeciesSelectionModal()
+        this.toggleChecked()
     };
     selectDisease = (item) => {
         // console.log(item)
-        const {navigate} = this.props.navigation;
+        const { navigate } = this.props.navigation;
         this.toggleDiseaseModal()
         navigate('Output', {
             result: item
@@ -152,7 +153,7 @@ export default class ImageScreen extends Component {
     };
 
     remoteDiagnosis = async (photo) => {
-        if(this.state.isInternetConnected) {
+        if (this.state.isInternetConnected) {
             this.toggleUploadModal();
             await this.handleRemoteDiagnosis(photo)
         } else {
@@ -172,7 +173,7 @@ export default class ImageScreen extends Component {
             (snapshot) => {
                 console.log(snapshot.bytesTransferred);
                 let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({uploadProgress: progress})
+                this.setState({ uploadProgress: progress })
                 if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                     //predict
                 }
@@ -181,7 +182,7 @@ export default class ImageScreen extends Component {
                 unsubscribe();
                 console.error(error);
             }, () => {
-                this.setState({uploadProgress: 0})
+                this.setState({ uploadProgress: 0 })
                 this.predictOnline(name)
             })
     }
@@ -235,9 +236,9 @@ export default class ImageScreen extends Component {
         let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/` + this.state.modelName + '.txt';
 
         tflite.loadModel({
-                model: modelFile,
-                labels: labelsFile,
-            },
+            model: modelFile,
+            labels: labelsFile,
+        },
             (err, res) => {
                 if (err)
                     console.log(err);
@@ -245,12 +246,12 @@ export default class ImageScreen extends Component {
                     console.log(res);
             });
         tflite.runModelOnImage({
-                path,
-                imageMean: 0.0,
-                imageStd: 255.0,
-                numResults: 4,
-                threshold: 0.05
-            },
+            path,
+            imageMean: 0.0,
+            imageStd: 255.0,
+            numResults: 4,
+            threshold: 0.05
+        },
             (err, res) => {
                 if (err)
                     console.log(err);
@@ -276,23 +277,23 @@ export default class ImageScreen extends Component {
     }
 
     render() {
-        let {height, width} = Dimensions.get('window');
+        let { height, width } = Dimensions.get('window');
         let photoToBeChecked = this.props.navigation.state.params.photoss;
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Image
                     style={{
                         flex: 1,
                         height: height,
                         width: width
                     }}
-                    source={{uri: photoToBeChecked.uri}}/>
+                    source={{ uri: photoToBeChecked.uri }} />
 
                 <CheckBox
                     title='I know the species'
                     checked={this.state.checked}
                     onPress={() => {
-                        this.toggleChecked();
+                        this.state.checked ? this.toggleChecked() : null;
                         this.toggleSpeciesSelectionModal()
                     }}
                 />
@@ -302,18 +303,18 @@ export default class ImageScreen extends Component {
                     justifyContent: 'center',
                     alignItems: 'center'
                 }} isVisible={this.state.isSpeciesSelectionModalVisible}>
-                    <FlatList style={{flex: 1}}
-                              data={this.state.data}
-                              renderItem={({item}) => (
-                                  <ListItem onPress={() => this.selectSpecies(item)}
-                                      // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                            title={`${item.name}`}
-                                            subtitle={item.modelName}
-                                  />
-                              )}
-                              keyExtractor={item => item.modelName}
-                              ItemSeparatorComponent={this.renderSeparator}
-                              ListHeaderComponent={this.renderHeader}
+                    <FlatList style={{ flex: 1 }}
+                        data={this.state.data}
+                        renderItem={({ item }) => (
+                            <ListItem onPress={() => this.selectSpecies(item)}
+                                // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                title={`${item.name}`}
+                                subtitle={item.modelName}
+                            />
+                        )}
+                        keyExtractor={item => item.modelName}
+                        ItemSeparatorComponent={this.renderSeparator}
+                        ListHeaderComponent={this.renderHeader}
                     />
                 </Modal>
                 <Modal style={{
@@ -322,8 +323,8 @@ export default class ImageScreen extends Component {
                     justifyContent: 'center',
                     alignItems: 'center'
                 }} isVisible={this.state.isUploadModalVisible}>
-                    <View><Progress.Circle progress={this.state.uploadProgress} size={200} showsText={true}/>
-                        <Text style={{color: "#FFFF00"}}>Uploading Image !</Text></View>
+                    <View><Progress.Circle progress={this.state.uploadProgress} size={200} showsText={true} />
+                        <Text style={{ color: "#FFFF00" }}>Uploading Image !</Text></View>
                 </Modal>
                 <Modal style={{
                     flex: 1,
@@ -331,8 +332,8 @@ export default class ImageScreen extends Component {
                     justifyContent: 'center',
                     alignItems: 'center'
                 }} isVisible={this.state.isPredictionModalVisible}>
-                    <View><Progress.CircleSnail indeterminateAnimationDuration={200} size={200} color={['blue']}/>
-                        <Text style={{color: "#FFFF00"}}>Diagnosing Image !</Text></View>
+                    <View><Progress.CircleSnail indeterminateAnimationDuration={200} size={200} color={['blue']} />
+                        <Text style={{ color: "#FFFF00" }}>Diagnosing Image !</Text></View>
                 </Modal>
                 <Modal style={{
                     flex: 1,
@@ -344,21 +345,20 @@ export default class ImageScreen extends Component {
                         width: 300,
                         height: 300
                     }}>
-                        <FlatList style={{flex: 1}}
-                                  data={this.state.diseaseData}
-                                  renderItem={({item}) => (
-                                      <ListItem onPress={() => this.selectDisease(item)}
-                                          // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                                title={`${item.species} Confidence: ${item.speciesConfidence}`}
-                                                subtitle={`${item.disease} Confidence: ${item.diseaseConfidence}`}
-                                      />
-                                  )}
-                                  keyExtractor={item => item.disease}
-                                  ItemSeparatorComponent={this.renderSeparator}
-                                  ListHeaderComponent={this.renderHeader}
+                        <FlatList style={{ flex: 1 }}
+                            data={this.state.diseaseData}
+                            renderItem={({ item }) => (
+                                <ListItem onPress={() => this.selectDisease(item)}
+                                    // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                    title={`${item.species} Confidence: ${item.speciesConfidence}`}
+                                    subtitle={`${item.disease} Confidence: ${item.diseaseConfidence}`}
+                                />
+                            )}
+                            keyExtractor={item => item.disease}
+                            ItemSeparatorComponent={this.renderSeparator}
                         /></View>
                 </Modal>
-                <View style={{flexDirection: 'row', height: 100}}>
+                <View style={{ flexDirection: 'row', height: 100 }}>
                     <TouchableOpacity style={{
                         flex: 1,
                         backgroundColor: '#6000FF',
@@ -366,25 +366,26 @@ export default class ImageScreen extends Component {
                         alignItems: 'center',
                         borderColor: '#FFFFFF'
                     }}
-                                      onPress={() => this.props.navigation.goBack()}>
-                        <Text style={{color: '#FFFFFF'}}>
+                        onPress={() => this.props.navigation.goBack()}>
+                        <Text style={{ color: '#FFFFFF' }}>
                             Cancel
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center'}}
+                        style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => this.remoteDiagnosis(photoToBeChecked.uri)}>
-                        <Text style={{color: '#FFFFFF'}}>
+                        <Text style={{ color: '#FFFFFF' }}>
                             Remote Diagnosis
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={{flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center'}}
+                        disabled={!this.state.checked}
+                        style={{ flex: 1, backgroundColor: `${this.state.checked ? '#6000FF' : '#D3D3D3'}`, justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => {
                             alert('predicting'),
                                 this.localDiagnosis(photoToBeChecked.uri)
                         }}>
-                        <Text style={{color: '#FFFFFF'}}>
+                        <Text style={{ color: `${this.state.checked ? '#FFFFFF' : '#000000'}` }}>
                             Local Diagnosis
                         </Text>
                     </TouchableOpacity>
