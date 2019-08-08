@@ -1,17 +1,27 @@
 import React, {Component} from 'react';
-import {View, Text, FlatList, ActivityIndicator, StyleSheet, AsyncStorage, ToastAndroid} from 'react-native';
+import {
+    View,
+    Text,
+    FlatList,
+    ActivityIndicator,
+    StyleSheet,
+    AsyncStorage,
+    ToastAndroid,
+    TouchableNativeFeedback
+} from 'react-native';
 import {ListItem, SearchBar} from 'react-native-elements';
-import firebase from 'react-native-firebase'
+import {TouchableHighlight} from 'react-native';
+import firebase from 'react-native-firebase';
 import Modal from "react-native-modal";
 import NetInfo from "@react-native-community/netinfo";
 
 import * as Progress from 'react-native-progress';
 
-function showInternetConnectedToast() {
+export function showInternetConnectedToast() {
     ToastAndroid.showWithGravity('Internet Connected!', ToastAndroid.SHORT, ToastAndroid.CENTER)
 }
 
-function showNoInternetToast() {
+export function showNoInternetToast() {
     ToastAndroid.showWithGravity('No Internet Connection!', ToastAndroid.SHORT, ToastAndroid.CENTER)
 }
 
@@ -28,7 +38,9 @@ export default class DownloadableModels extends Component {
             error: null,
             isDownloadModalVisible: false,
             downloadProgress: 0,
+            currentItem: ''
         };
+
 
         this.arrayholder = [];
     }
@@ -49,11 +61,8 @@ export default class DownloadableModels extends Component {
         }
     }
 
-    componentWillMount() {
-        if (!Array.isArray(this.state.data) || !this.state.data.length && this.state.isInternetConnected) {
-            this.makeRemoteRequest();
-        }
-
+    componentWillUnmount() {
+        NetInfo.removeEventListener('connectionChange');
     }
 
     toggleDownloadModal = () => {
@@ -120,62 +129,94 @@ export default class DownloadableModels extends Component {
             />
         );
     };
+    download = (item) => {
+        this.setState({
+            currentItem: item.name
+        });
+        this.downloadLabel(item);
+        this.downloadModel(item);
+    };
 
-    download(item) {
+    downloadLabel = (item) => {
         if (this.state.isInternetConnected) {
-            this.toggleDownloadModal();
+            /*this.setState({
+                isDownloadModalVisible: true
+            });*/
+            // this.toggleDownloadModal();
             // Create a reference to the file we want to download
             const path = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/` + item.modelName + ".txt";
-            console.log(path)
+
             const ref = firebase.storage().ref('/labels/' + item.modelName + '.txt');
 
             const unsubscribe = ref.downloadFile(path).on(
                 firebase.storage.TaskEvent.STATE_CHANGED,
                 (snapshot) => {
-                    console.log(snapshot.bytesTransferred);
-                    console.log(snapshot.totalBytes);
                     if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                         // complete
+                        /* this.setState({
+                             isDownloadModalVisible: false
+                         });*/
                         console.log("Complete")
                     }
                 },
                 (error) => {
                     unsubscribe();
                     console.error(error);
-                    this.toggleDownloadModal()
+                    this.setState({
+                        isDownloadModalVisible: false
+                    })
                 });
             this.downloadModel(item)
         } else {
+            this.setState({
+                isDownloadModalVisible: false
+            });
             showNoInternetToast()
         }
-    }
+    };
 
-    downloadModel(item) {
-        // Create a reference to the file we want to download
-        const path = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/` + item.modelName + '.tflite';
-        console.log(path);
-        const ref = firebase.storage().ref('/models/' + item.modelName + '.tflite');
+    downloadModel = (item) => {
+        if (this.state.isInternetConnected) {
+            this.setState({
+                isDownloadModalVisible: true
+            });
+            // Create a reference to the file we want to download
+            const path = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/` + item.modelName + '.tflite';
+            const ref = firebase.storage().ref('/models/' + item.modelName + '.tflite');
 
-        const unsubscribe = ref.downloadFile(path).on(
-            firebase.storage.TaskEvent.STATE_CHANGED,
-            (snapshot) => {
-                console.log(snapshot.bytesTransferred);
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({downloadProgress: progress})
+            const unsubscribe = ref.downloadFile(path).on(
+                firebase.storage.TaskEvent.STATE_CHANGED,
+                (snapshot) => {
+                    let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                    this.setState({downloadProgress: progress});
 
-                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-                    // complete
-                    // AsyncStorage.clear()
-                    AsyncStorage.setItem(`${item.name}`, JSON.stringify(item))
-                    this.toggleDownloadModal()
-                }
-            },
-            (error) => {
-                unsubscribe();
-                console.error(error);
-                this.toggleDownloadModal()
-            })
-    }
+                    if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                        // complete
+                        // AsyncStorage.clear()
+                        AsyncStorage.setItem(`${item.name}`, JSON.stringify(item));
+                        this.setState({
+                            isDownloadModalVisible: false
+                        });
+                    }
+                    this.setState({
+                        progress: 0
+                    })
+                },
+                (error) => {
+                    unsubscribe();
+                    console.error(error);
+                    this.setState({
+                        isDownloadModalVisible: false
+                    });
+                    // this.toggleDownloadModal()
+                });
+        } else {
+            this.setState({
+                isDownloadModalVisible: false
+            });
+            showNoInternetToast();
+        }
+    };
 
     render() {
         if (this.state.loading) {
@@ -187,14 +228,28 @@ export default class DownloadableModels extends Component {
         }
         return (
             <View style={{flex: 1}}>
-                <Modal style={{
-                    flex: 1,
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }} isVisible={this.state.isDownloadModalVisible}>
-                    <View><Progress.Circle progress={this.state.downloadProgress} size={200} showsText={true}/>
-                        <Text style={{color: "#FFFF00"}}>Downloading Model !</Text></View>
+                <Modal
+                    style={{
+                        flex: 1,
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center'
+                    }}
+                    isVisible={this.state.isDownloadModalVisible}
+                    onRequestClose={() => {
+                        this.toggleDownloadModal()
+                    }}
+                >
+                    <TouchableNativeFeedback
+                        onPress={() => {
+                            this.toggleDownloadModal()
+                        }}>
+                        <View>
+                            <Progress.Circle progress={this.state.downloadProgress} size={200} showsText={true}/>
+                            <Text style={{color: "#FFFF00"}}>Downloading Model {this.state.currentItem}!</Text>
+
+                        </View>
+                    </TouchableNativeFeedback>
                 </Modal>
                 <FlatList
                     data={this.state.data}
