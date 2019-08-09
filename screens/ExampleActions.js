@@ -8,11 +8,20 @@ import firebase from "react-native-firebase";
 
 export function getComments(sampleComments) {
   let c = []
+    console.log(sampleComments)
+
+    if(sampleComments.constructor===Array){
+        c = [...sampleComments]
+        console.log(c)
+
+    }else{
   let keys = Object.keys(sampleComments).sort()
+  console.log(keys)
   for (let i = 0;i<keys.length;i++){
+
     c.push(sampleComments[keys[i]])
-  }
-  return c.splice(c.length-5);
+  }}
+  return c.splice(c.length-1);
 }
 
 export function paginateComments(sampleComments,
@@ -172,7 +181,8 @@ export function save(sampleComments,comments, text, parentCommentId, date, usern
   };
 
   if (!parentCommentId) {
-    comments.push(com);
+    
+    //comments.push(com);
   } else {
     comments.find(c => {
       if (c.commentId === parentCommentId) {

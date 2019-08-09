@@ -30,15 +30,18 @@ export default class PostScreen extends Component {
     }
 
     componentDidMount=()=> {
-        if(this.item.comments!==0) {
+        if(true) {
             firebase.database().ref('comments/').orderByChild('postid').equalTo(this.item.postid).on('value', (snapshot) => {
+                console.log(snapshot)
                 let comments = Object.keys(snapshot._value).map(function (key) {
                     return snapshot._value[key]
                 })
+                console.log(comments)
                 let count = 0
                 const sampleCommentsRaw = comments
                 //count and
                 sampleCommentsRaw.forEach(c => {
+                    console.log(c)
                     if (c.children) {
                         c.childrenCount = c.children.length;
                     }
