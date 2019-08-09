@@ -46,8 +46,11 @@ export default class PostScreen extends Component {
                         c.childrenCount = c.children.length;
                     }
                     firebase.database().ref('users/').orderByKey().equalTo(`${c.userid}`).on('value', (snapshot1) => {
+
                         c.name = snapshot1._value[c.userid].firstname + ' ' + snapshot1._value[c.userid].lastname
                         c.userProfilePic = snapshot1._value[c.userid].profile_picture
+                        if(!c.parentId){
+                        c.parentId = null}
                         count += 1
                         if (count === sampleCommentsRaw.length) {
                             this.sampleComments = Object.freeze(sampleCommentsRaw);
@@ -129,6 +132,7 @@ export default class PostScreen extends Component {
     }
 
     likesExtractor(item) {
+        if(item.liked){
         return item.likes.map(like => {
             return {
                 image: like.image,
@@ -138,7 +142,7 @@ export default class PostScreen extends Component {
                     console.log("Taped: " + username);
                 }
             };
-        });
+        });}
     }
 
     isCommentChild(item) {
@@ -147,7 +151,8 @@ export default class PostScreen extends Component {
 
     render() {
         let nav = this.props.navigation.getParam('nav')
-        this.item = this.props.navigation.getParam('post')
+        let post = this.props.navigation.getParam('post')
+        let user = this.props.navigation.getParam('user')
         const review = this.state.review;
         const data = this.state.comments;
 
@@ -164,7 +169,7 @@ export default class PostScreen extends Component {
                     this.scrollIndex = event.nativeEvent.contentOffset.y;
                 }}
                 ref={"scrollView"}
-            ><View style={{marginTop:8}}><Post item={this.item} navigation={nav}/></View>
+            ><View style={{marginTop:8}}><Post item={post} navigation={nav}/></View>
                 {this.state.comments.length ? (
                     <Comments
                         data={data}
@@ -220,7 +225,8 @@ export default class PostScreen extends Component {
                                 text,
                                 parentCommentId,
                                 date,
-                                "testUser"
+                                user,
+                                post.id
                             );
                             this.setState({
                                 comments: comments

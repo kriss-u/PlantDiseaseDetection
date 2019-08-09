@@ -24,6 +24,20 @@ class Post extends Component {
 
         };
     }
+    componentDidMount() {
+        const { currentUser } = firebase.auth()
+        let userId = currentUser.uid
+        let ref = firebase.database().ref("users/");
+        let query = ref.orderByKey()
+            .equalTo(userId)
+        query.on("value", (snapshot) => {
+            let user = Object.values(snapshot.val())[0]
+            user.id = userId
+            this.setState({
+                user:user
+            })
+        })
+    }
     likeToggled(item) {
 
         //update upVotes
@@ -57,6 +71,7 @@ class Post extends Component {
         let postImage = this.props.item.imageurl
         let nav = this.props.navigation
         let item = this.props.item
+        let user = this.state.user
         const upvoteIconColor= (this.state.liked)? '#009900':null;
         return (
                 <View style={{flex:1, width: 100+"%"}}>
@@ -78,7 +93,7 @@ class Post extends Component {
                 </View></TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => nav.navigate('PostScreen',{post:item,nav:nav})}>
+                    onPress={() => nav.navigate('PostScreen',{post:item,nav:nav,user:user})}>
                     <Text style={{marginLeft: 60,marginTop: 20}}>{body}</Text>
 
                     <Image

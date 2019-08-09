@@ -21,7 +21,7 @@ export function getComments(sampleComments) {
 
     c.push(sampleComments[keys[i]])
   }}
-  return c.splice(c.length-1);
+  return c.splice(c.length-2);
 }
 
 export function paginateComments(sampleComments,
@@ -151,8 +151,17 @@ export function deleteComment(comments, cmnt) {
   }
   return comments;
 }
+function updateReply(item){
+  //update upVotes
+  let writeRef = firebase.database().ref('comments/'+item.parentId)
 
-export function save(sampleComments,comments, text, parentCommentId, date, username) {
+    let updates = {};
+    updates["/children/" + item.likeKey] = null;
+    writeRef.update(updates);
+    //     .
+
+}
+export function save(sampleComments,comments, text, parentCommentId, date, user, postid) {
   // find last comment id
   let lastCommentId = 0;
   sampleComments.forEach(c => {
@@ -175,14 +184,16 @@ export function save(sampleComments,comments, text, parentCommentId, date, usern
     updated_at: date,
     liked: false,
     reported: false,
-    email: username,
     body: text,
-    likes: []
+    userid: user.id,
+    postid: postid
   };
 
   if (!parentCommentId) {
-    
-    //comments.push(com);
+
+    comments.push(com);
+    firebase.database().ref('comments/'+com.commentId).set(com)
+
   } else {
     comments.find(c => {
       if (c.commentId === parentCommentId) {
@@ -191,11 +202,15 @@ export function save(sampleComments,comments, text, parentCommentId, date, usern
         if (c.children) {
           c.childrenCount = c.childrenCount * 1 + 1;
           c.children.push(com);
+          updateReply(com)
+
+
         } else {
           c.childrenCount = 1;
 
           c.children = [];
           c.children.push(com);
+          updateReply(com)
         }
         return true;
       }
