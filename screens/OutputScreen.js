@@ -80,6 +80,10 @@ export default class OutputScreen extends Component {
         this.getDiseaseData()
     }
 
+    componentWillUnmount() {
+        NetInfo.removeEventListener('connectionChange');
+    }
+
     toggleDescription = () => {
         this.setState({
             isDescriptionVisible: !this.state.isDescriptionVisible

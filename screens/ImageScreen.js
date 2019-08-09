@@ -235,6 +235,7 @@ export default class ImageScreen extends Component {
     }
 
     predict(path) {
+
         let modelFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/models/` + this.state.modelName + '.tflite';
         let labelsFile = `${firebase.storage.Native.DOCUMENT_DIRECTORY_PATH}/labels/` + this.state.modelName + '.txt';
 
@@ -273,6 +274,7 @@ export default class ImageScreen extends Component {
                     this.setState({
                         diseaseData: array
                     })
+                    this.togglePredictionModal()
                     this.toggleDiseaseModal()
                 }
             });
@@ -385,8 +387,8 @@ export default class ImageScreen extends Component {
                         disabled={!this.state.checked}
                         style={{ flex: 1, backgroundColor: `${this.state.checked ? '#6000FF' : '#D3D3D3'}`, justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => {
-                            alert('predicting'),
-                                this.localDiagnosis(photoToBeChecked.uri)
+                            this.togglePredictionModal(),
+                                setTimeout(() => this.localDiagnosis(photoToBeChecked.uri), 2000)
                         }}>
                         <Text style={{ color: `${this.state.checked ? '#FFFFFF' : '#000000'}` }}>
                             Local Diagnosis

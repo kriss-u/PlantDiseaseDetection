@@ -1,8 +1,8 @@
 import React from 'react';
-import {Button, ScrollView, StyleSheet, View} from 'react-native';
-import {Text} from 'react-native-elements';
+import { Button, ScrollView, StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-elements';
 import firebase from 'react-native-firebase'
-import {GoogleSignin} from "react-native-google-signin";
+import { GoogleSignin } from "react-native-google-signin";
 import FAIcon from "react-native-vector-icons/FontAwesome5";
 
 export default class ProfilesScreen extends React.Component {
@@ -18,9 +18,18 @@ export default class ProfilesScreen extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({
-            firstName: 'John',
-            lastName: 'Doe'
+        const { currentUser } = firebase.auth()
+        let userId = currentUser.uid
+        let ref = firebase.database().ref("users/");
+        let query = ref.orderByKey()
+            .equalTo(userId)
+        query.on("value", (snapshot) => {
+            let user = Object.values(snapshot.val())[0]
+            this.setState({
+                firstName: user.firstname,
+                lastName: user.lastname,
+                email: user.email
+            })
         })
     }
 
@@ -42,13 +51,13 @@ export default class ProfilesScreen extends React.Component {
                 <View style={styles.container}>
                     <View style={styles.nameContainer}>
                         <Text h1 style={styles.textStyle}>{this.state.firstName} {this.state.lastName}</Text>
-                        <Text h2 style={styles.textStyle}>{this.state.email ? this.state.email: 'Place for Email'}</Text>
+                        <Text h2 style={styles.textStyle}>{this.state.email ? this.state.email : 'Place for Email'}</Text>
                         <Text h2 style={styles.textStyle}>Place for photo</Text>
                     </View>
                     <View style={styles.buttonContainer}>
                         <FAIcon.Button
                             name='sign-out-alt'
-                            onPress={()=> this._signOut()}
+                            onPress={() => this._signOut()}
                             backgroundColor='#009900'
                         >
                             Sign Out
@@ -63,7 +72,7 @@ export default class ProfilesScreen extends React.Component {
 
 const styles = StyleSheet.create({
     scrollViewContainer: {
-        flexGrow:1,
+        flexGrow: 1,
         paddingTop: 40,
         alignItems: 'center',
         justifyContent: 'space-between'
@@ -78,7 +87,7 @@ const styles = StyleSheet.create({
         // justifyContent: 'center'
     },
     nameContainer: {
-        flex:1,
+        flex: 1,
     },
     buttonContainer: {
         flex: 3,
