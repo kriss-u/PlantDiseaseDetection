@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Button,
     Dimensions,
@@ -11,11 +11,14 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import {PostFeed} from '../components/container'
+import { PostFeed } from '../components/container'
 import Modal from "react-native-modal";
 import ImagePicker from "react-native-image-picker";
 import firebase from "react-native-firebase"
 import uuid from "uuid";
+import { NavigationEvents } from 'react-navigation';
+import Icon from 'react-native-vector-icons/FontAwesome5'
+import { TouchableNativeFeedback } from 'react-native-gesture-handler';
 
 const options = {
     storageOptions: {
@@ -36,7 +39,9 @@ export default class HomeScreen extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            user: 'not signed in',
             isNewPostModalVisible: false,
+            isNotSignedIn: true,
             textInputHeight: 40,
             photo: 'file://undefined'
         }
@@ -44,8 +49,9 @@ export default class HomeScreen extends Component {
     }
 
     toggleNewPostModal = () => {
-        this.setState({isNewPostModalVisible: !this.state.isNewPostModalVisible});
+        this.setState({ isNewPostModalVisible: !this.state.isNewPostModalVisible });
     };
+
     updateSize = (height) => {
         this.setState({
             height
@@ -64,7 +70,7 @@ export default class HomeScreen extends Component {
     }
 
     openGallery() {
-        this.setState({name: uuid.v4()})
+        this.setState({ name: uuid.v4() })
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
@@ -85,7 +91,7 @@ export default class HomeScreen extends Component {
             (snapshot) => {
                 console.log(snapshot.bytesTransferred);
                 let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({uploadProgress: progress})
+                this.setState({ uploadProgress: progress })
                 if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                     //predict
                 }
@@ -121,103 +127,135 @@ export default class HomeScreen extends Component {
         const height = Dimensions.get("window").height;
         return (
             <View style={styles.container}>
+                <NavigationEvents
+                    onDidFocus={payload => {
+                        firebase.auth().onAuthStateChanged((user) => {
+                            if (user) {
+                                this.setState({
+                                    isNotSignedIn: false
+                                })
+                            } else {
+                                this.setState({
+                                    isNotSignedIn: true
+                                })
+                            }
+                        });
+                    }}
+                />
+                {this.state.isNotSignedIn ?
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ textAlign: 'center', color: 'green', fontSize: 40, paddingBottom: 20 }}>
+                            Sign in first
+                        </Text>
+                        <Icon.Button
+                            backgroundColor='#009900'
+                            onPress={() => {
+                                const { navigate } = this.props.navigation
+                                navigate('UsersStack')
+                            }}
+                        >Okay, Sign In!
+                                </Icon.Button>
 
-                <Modal
-                    style={styles.modal} isVisible={this.state.isNewPostModalVisible}
-                >
-                    <View style={styles.userBar}>
-                        <View style={{flexDirection: 'row'}}>
-                            <Button title="x" onPress={() => {
-                                this.toggleNewPostModal()
-                            }}>
-                                {/*<Icon name="close" style={{ color: "black", fontSize: 32 }} />*/}
-                            </Button>
-                        </View>
-                        <View style={{alignItems: "center"}}>
-                            <Button onPress={() => this.handlePost()}
-                                    title="Post"
-                            />
-                        </View>
+                    </View> : null}
+                {!this.state.isNotSignedIn ?
+                    <View style={styles.container}>
+                        <Modal
+                            style={styles.modal} isVisible={this.state.isNewPostModalVisible}
+                        >
+                            <View style={styles.userBar}>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Button title="x" onPress={() => {
+                                        this.toggleNewPostModal()
+                                    }}>
+                                        {/*<Icon name="close" style={{ color: "black", fontSize: 32 }} />*/}
+                                    </Button>
+                                </View>
+                                <View style={{ alignItems: "center" }}>
+                                    <Button onPress={() => this.handlePost()}
+                                        title="Post"
+                                    />
+                                </View>
 
-                    </View>
+                            </View>
 
-                    <ScrollView>
-                        <View style={styles.userBar}>
+                            <ScrollView>
+                                <View style={styles.userBar}>
 
-                            <View style={{flexDirection: 'row'}}>
-                                <Image
-                                    source={{uri: "https://lh4.googleusercontent.com/-nxzWnbmf4S0/AAAAAAAAAAI/AAAAAAAAABc/eXuoqHhvASM/photo.jpg"}}
-                                    style={styles.userImage}
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <Image
+                                            source={{ uri: "https://lh4.googleusercontent.com/-nxzWnbmf4S0/AAAAAAAAAAI/AAAAAAAAABc/eXuoqHhvASM/photo.jpg" }}
+                                            style={styles.userImage}
+                                        />
+                                    </View>
+                                    <View style={{ alignItems: "center" }}>
+                                        <Text style={{ fontSize: 30 }}>...</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.inputSection}>
+                                    <TextInput
+                                        style={styles.input}
+                                        height={this.state.height}
+                                        multiline={true}
+
+                                        onChangeText={text => this.setState({ newPostText: text })}
+                                        placeholder={"Write something ..."}
+                                        numberOfLines={3}
+                                        onContentSizeChange={(e) => this.updateSize(e.nativeEvent.contentSize.height)}
+                                    /></View>
+
+                                <TouchableOpacity onPress={() => this.openGallery()}><Image
+                                    source={this.state.photo === 'file://undefined'
+                                        ? require('../assets/images/imageThumbnail.jpg')
+                                        : { uri: this.state.photo }}
+
+                                    style={styles.postImage}
+                                /></TouchableOpacity>
+
+                            </ScrollView>
+                            <View style={styles.modalFooter}>
+
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Button title="ClickImage" onPress={() => {
+                                        this.openCamera()
+                                    }}>
+                                        {/*<Icon name="ios-image" />*/}
+                                    </Button>
+                                </View>
+
+                            </View>
+                        </Modal>
+                        {/*<View style={styles.navBar}>*/}
+                        {/*  <Text>AgroPost</Text>*/}
+                        {/*</View>*/}
+                        <PostFeed navigation={that.props.navigation} />
+                        {/*new post button*/}
+                        <TouchableOpacity
+                            style={{
+                                position: 'absolute',
+                                right: 30,
+                                bottom: 30
+                                // paddingBottom: 20
+
+                            }}
+                            onPress={() => { this.toggleNewPostModal() }}>
+                            <View
+                                style={{
+                                    height: 60,
+                                    width: 60,
+                                    borderRadius: 30,
+                                    backgroundColor: "#1DA812",
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}
+                            ><Image
+
+                                    style={{ height: 30, width: 30 }}
+                                    source={require("../assets/images/icons/tweet.png")}
                                 />
                             </View>
-                            <View style={{alignItems: "center"}}>
-                                <Text style={{fontSize: 30}}>...</Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.inputSection}>
-                            <TextInput
-                                style={styles.input}
-                                height={this.state.height}
-                                multiline={true}
-
-                                onChangeText={text => this.setState({newPostText: text})}
-                                placeholder={"Write something ..."}
-                                numberOfLines={3}
-                                onContentSizeChange={(e) => this.updateSize(e.nativeEvent.contentSize.height)}
-                            /></View>
-
-                        <TouchableOpacity onPress={() => this.openGallery()}><Image
-                            source={this.state.photo === 'file://undefined'
-                                ? require('../assets/images/imageThumbnail.jpg')
-                                : {uri: this.state.photo}}
-
-                            style={styles.postImage}
-                        /></TouchableOpacity>
-
-                    </ScrollView>
-                    <View style={styles.modalFooter}>
-
-                        <View style={{flexDirection: 'row'}}>
-                            <Button title="ClickImage" onPress={() => {
-                                this.openCamera()
-                            }}>
-                                {/*<Icon name="ios-image" />*/}
-                            </Button>
-                        </View>
-
-                    </View>
-                </Modal>
-                {/*<View style={styles.navBar}>*/}
-                {/*  <Text>AgroPost</Text>*/}
-                {/*</View>*/}
-                <PostFeed navigation={that.props.navigation}/>
-                {/*new post button*/}
-                <TouchableOpacity
-                    style={{
-                        position: "absolute",
-                        top: height / 1.55,
-                        left: width / 1.3
-                    }}
-                    onPress={() => {
-                        this.toggleNewPostModal()
-                    }}>
-                    <View
-                        style={{
-                            height: 60,
-                            width: 60,
-                            borderRadius: 30,
-                            backgroundColor: "#1DA812",
-                            alignItems: "center",
-                            justifyContent: "center"
-                        }}
-                    ><Image
-
-                        style={{height: 30, width: 30}}
-                        source={require("../assets/images/icons/tweet.png")}
-                    />
-                    </View>
-                </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View> : null}
             </View>
         )
     }
@@ -277,7 +315,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
         height: 100 + "%",
-        width: 100 + "%"
+        width: 100 + "%",
+        justifyContent: 'center'
     },
     input: {
         flex: 1,
