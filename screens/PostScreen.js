@@ -146,17 +146,7 @@ export default class PostScreen extends Component {
     }
 
     likesExtractor(item) {
-        if(item.liked){
-        return item.likes.map(like => {
-            return {
-                image: like.image,
-                name: like.username,
-                user_id: like.user_id,
-                tap: username => {
-                    console.log("Taped: " + username);
-                }
-            };
-        });}
+
     }
 
     isCommentChild(item) {
