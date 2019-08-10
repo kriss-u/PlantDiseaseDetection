@@ -50,10 +50,10 @@ export default class OutputScreen extends Component {
                         })
                     }
                     this.setState({
-                        disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
+                        disease: !!diseaseDetail[0] ? diseaseDetail[0] : '',
                         species: species,
                         speciesImages: species.imageLink,
-                        diseaseImages: diseaseDetail[0] !== "undefined" ? diseaseDetail[0].imageLink : undefined,
+                        diseaseImages: !!diseaseDetail[0] ? diseaseDetail[0].imageLink : undefined,
                     }, () => {
                         console.log(this.state.diseaseImages)
                     })
@@ -77,7 +77,9 @@ export default class OutputScreen extends Component {
                     }
                     this.setState({
                         species: values,
-                        disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
+                        disease: !!diseaseDetail[0] ? diseaseDetail[0] : '',
+                        speciesImages: species.imageLink,
+                        diseaseImages: !!diseaseDetail[0] ? diseaseDetail[0].imageLink : undefined,
                     })
                 }
             } catch (error) {
@@ -204,7 +206,7 @@ export default class OutputScreen extends Component {
                         keyExtractor={item => item}
                     /> : null}
                     {this.renderSeparator()}
-                    {(this.state.speciesImages !== undefined) ?
+                    {(!!this.state.speciesImages) ?
                         <FlatList
                             data={[`${this.state.speciesImages}`]}
                             renderItem={({ item }) =>

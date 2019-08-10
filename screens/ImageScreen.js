@@ -361,8 +361,8 @@ export default class ImageScreen extends Component {
                             renderItem={({ item }) => (
                                 <ListItem onPress={() => this.selectDisease(item)}
                                     // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                    title={`${item.species} Confidence: ${item.speciesConfidence}`}
-                                    subtitle={`${item.disease} Confidence: ${item.diseaseConfidence}`}
+                                    title={`${item.species} Confidence: ${Number(item.speciesConfidence * 100).toFixed(2)}%`}
+                                    subtitle={`${item.disease} Confidence: ${Number(item.diseaseConfidence * 100).toFixed(2)}%`}
                                 />
                             )}
                             keyExtractor={item => item.disease}
