@@ -29,7 +29,8 @@ project.xcworkspace
 .gradle
 local.properties
 *.iml
-
+debug/
+release/
 # node.js
 #
 node_modules/
