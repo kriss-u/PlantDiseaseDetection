@@ -79,8 +79,11 @@ export default class ImageScreen extends Component {
                     stores.map((result, i, store) => {
                         // get at each store's value so you can work with it
                         let value = JSON.parse(store[i][1]);
-                        if (value.name !== undefined) {
-                            this.arrayholder.push(value);
+                        console.log(value)
+                        if (!!value) {
+                            if (!!value.name) {
+                                this.arrayholder.push(value);
+                            }
                         }
                     });
                 });
@@ -315,7 +318,7 @@ export default class ImageScreen extends Component {
                         data={this.state.data}
                         renderItem={({ item }) => (
                             <ListItem onPress={() => this.selectSpecies(item)}
-                                      leftAvatar={{ source: { uri: item.image } }}
+                                leftAvatar={{ source: { uri: item.image } }}
                                 title={`${item.name}`}
                                 subtitle={item.modelName}
                             />
