@@ -68,6 +68,7 @@ class Post extends Component {
         let body = this.props.item.body
         //calculate number of likes
         let upvotes = this.props.item.likes? Object.keys(this.props.item.likes).length:0
+        let comments = this.props.item.comments
         let userPic = this.props.item.userProfilePic
         let postImage = this.props.item.imageurl
         let nav = this.props.navigation
@@ -115,12 +116,19 @@ class Post extends Component {
                             size={50}
                         />
                     </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => nav.navigate('PostScreen',{post:item,nav:nav,user:user})}>
+                        <Icon
+                            name="comment"
+                            size={50}
+                        />
+                    </TouchableOpacity>
                    
                 </View>
 
                 <View style={styles.commentBar}>
-                    <Text>{upvotes} UpVotes</Text>
-                    
+                    <Text>     {upvotes}     </Text>
+                    <Text>       {comments} </Text>
 
                 </View>
                 {/*</ScrollView>*/}
@@ -156,8 +164,11 @@ const styles = StyleSheet.create({
         width: 100+"%",
         borderColor:"rgb(233,233,233)",
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderTopWidth: StyleSheet.hairlineWidth
-    },
+        borderTopWidth: StyleSheet.hairlineWidth,
+        flexDirection: "row",
+        paddingLeft: 15
+            },
+
     icon:{
         height: 40,
         width: 40,
@@ -168,7 +179,10 @@ const styles = StyleSheet.create({
         width: 100+"%",
         borderColor:"rgb(233,233,233)",
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderTopWidth: StyleSheet.hairlineWidth
+        borderTopWidth: StyleSheet.hairlineWidth,
+        flexDirection: "row",
+        paddingLeft: 15
+
     },
 });
 

@@ -232,8 +232,8 @@ export default class HomeScreen extends Component {
                         <TouchableOpacity
                             style={{
                                 position: 'absolute',
-                                right: 30,
-                                bottom: 30
+                                right: width/20,
+                                bottom: height/20
                                 // paddingBottom: 20
 
                             }}
