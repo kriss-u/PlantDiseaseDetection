@@ -110,8 +110,7 @@ export default class HomeScreen extends Component {
                         body: this.state.newPostText,
                         comments: 0,
                         imageurl: imageUri,
-                        upVotes: 0,
-                        userid: 0,
+                        userid:  firebase.auth().currentUser.uid,
                         postid: key
                     })
                     .then(function (snapshot) {

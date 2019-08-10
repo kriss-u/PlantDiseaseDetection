@@ -50,6 +50,7 @@ class Post extends Component {
         }
         else {
              let updates = {};
+             console.log(item.likeKey)
              updates["/likes/" + item.likeKey] = null;
              writeRef.update(updates);
             //     .

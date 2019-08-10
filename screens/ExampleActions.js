@@ -21,7 +21,7 @@ export function getComments(sampleComments) {
 
     c.push(sampleComments[keys[i]])
   }}
-  return c.splice(c.length-2);
+  return c.splice(c.length-5);
 }
 
 export function paginateComments(sampleComments,
@@ -154,21 +154,19 @@ export function deleteComment(comments, cmnt) {
 function updateReply(item){
   //update upVotes
   let writeRef = firebase.database().ref('comments/'+item.parentId)
-
-    let updates = {};
-    updates["/children/" + item.likeKey] = null;
-    writeRef.update(updates);
-    //     .
+    writeRef.child('children')
+        .push(item)
 
 }
 export function save(sampleComments,comments, text, parentCommentId, date, user, postid) {
   // find last comment id
-  let lastCommentId = 0;
+  let lastCommentId = -2;
   sampleComments.forEach(c => {
     if (c.commentId > lastCommentId) {
       lastCommentId = c.commentId;
     }
     if (c.children) {
+
       c.children.forEach(c2 => {
         if (c2.commentId > lastCommentId) {
           lastCommentId = c2.commentId;
@@ -185,6 +183,8 @@ export function save(sampleComments,comments, text, parentCommentId, date, user,
     liked: false,
     reported: false,
     body: text,
+    name: user.firstname+' '+user.lastname,
+    userProfilePic: user.profile_picture,
     userid: user.id,
     postid: postid
   };
@@ -193,6 +193,13 @@ export function save(sampleComments,comments, text, parentCommentId, date, user,
 
     comments.push(com);
     firebase.database().ref('comments/'+com.commentId).set(com)
+    let writeRef=firebase.database().ref('posts/'+postid)
+    writeRef.once("value",(snapshot) => {
+      let updates = {};
+      updates["comments"] = snapshot._value.comments+1;
+      writeRef.update(updates);
+    } )
+
 
   } else {
     comments.find(c => {
