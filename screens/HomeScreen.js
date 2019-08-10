@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     Button,
     Dimensions,
@@ -11,14 +11,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { PostFeed } from '../components/container'
+import {PostFeed} from '../components/container'
 import Modal from "react-native-modal";
 import ImagePicker from "react-native-image-picker";
 import firebase from "react-native-firebase"
 import uuid from "uuid";
-import { NavigationEvents } from 'react-navigation';
+import {NavigationEvents} from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome5'
-import { TouchableNativeFeedback } from 'react-native-gesture-handler';
+import Iconn from 'react-native-vector-icons/MaterialIcons'
+
+import {TouchableNativeFeedback} from 'react-native';
 
 const options = {
     storageOptions: {
@@ -43,13 +45,37 @@ export default class HomeScreen extends Component {
             isNewPostModalVisible: false,
             isNotSignedIn: true,
             textInputHeight: 40,
-            photo: 'file://undefined'
+            photo: 'file://undefined',
+            isPosting: true,
+            isPosted: false,
+            startPost: false,
+            postDisabled: false
         }
 
     }
 
+    componentDidMount() {
+        const {currentUser} = firebase.auth()
+        let userId = currentUser.uid
+        let ref = firebase.database().ref("users/");
+        let query = ref.orderByKey()
+            .equalTo(userId)
+        query.on("value", (snapshot) => {
+            let user = Object.values(snapshot.val())[0]
+            user.id = userId
+            this.setState({
+                user: user
+            })
+        })
+    }
+
+    handleClose = () => {
+        this.setState({
+            isNewPostModalVisible: false
+        })
+    }
     toggleNewPostModal = () => {
-        this.setState({ isNewPostModalVisible: !this.state.isNewPostModalVisible });
+        this.setState({isNewPostModalVisible: !this.state.isNewPostModalVisible});
     };
 
     updateSize = (height) => {
@@ -70,7 +96,7 @@ export default class HomeScreen extends Component {
     }
 
     openGallery() {
-        this.setState({ name: uuid.v4() })
+        this.setState({name: uuid.v4()})
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
@@ -83,40 +109,57 @@ export default class HomeScreen extends Component {
     }
 
     handlePost() {
-        const name = uuid.v4()
-        const ref = firebase.storage().ref("/images/posts").child(name);
-        const that = this
-        const unsubscribe = ref.putFile(this.state.photo).on(
-            firebase.storage.TaskEvent.STATE_CHANGED,
-            (snapshot) => {
-                console.log(snapshot.bytesTransferred);
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({ uploadProgress: progress })
-                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-                    //predict
-                }
-            },
-            (error) => {
-                unsubscribe();
-                console.error(error);
-            }, (snapshot) => {
-                let imageUri = snapshot.downloadURL
-                console.log('uri', imageUri)
-                let writeRef = firebase.database().ref('posts/').push()
-                let key = writeRef.key
-                console.log('key', key)
-                writeRef
-                    .set({
-                        body: this.state.newPostText,
-                        comments: 0,
-                        imageurl: imageUri,
-                        userid:  firebase.auth().currentUser.uid,
-                        postid: key
+        this.setState({
+            postDisabled: true,
+        }, () => {
+            if (!this.state.isPosted) {
+                const name = uuid.v4()
+                const ref = firebase.storage().ref("/images/posts").child(name);
+                const that = this
+                const unsubscribe = ref.putFile(this.state.photo).on(
+                    firebase.storage.TaskEvent.STATE_CHANGED,
+                    (snapshot) => {
+                        console.log(snapshot.bytesTransferred);
+                        let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                        this.setState({uploadProgress: progress})
+                        if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
+                            //predict
+                        }
+                    },
+                    (error) => {
+                        unsubscribe();
+                        // console.error(error);
+                        this.setState({
+                            postDisabled: false
+                        })
+                    }, (snapshot) => {
+                        this.setState({
+                            isPosted: true,
+                        }, () => {
+                            let imageUri = snapshot.downloadURL
+                            console.log('uri', imageUri)
+                            let writeRef = firebase.database().ref('posts/').push()
+                            let key = writeRef.key
+                            console.log('key', key)
+                            writeRef
+                                .set({
+                                    body: this.state.newPostText,
+                                    comments: 0,
+                                    imageurl: imageUri,
+                                    userid: this.state.user.id,
+                                    postid: key
+                                })
+                                .then(function (snapshot) {
+                                    that.setState({
+                                        isNewPostModalVisible: false
+                                    })
+                                });
+                        })
+
                     })
-                    .then(function (snapshot) {
-                        that.toggleNewPostModal()
-                    });
-            })
+            }
+
+        })
 
     }
 
@@ -142,18 +185,18 @@ export default class HomeScreen extends Component {
                     }}
                 />
                 {this.state.isNotSignedIn ?
-                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ textAlign: 'center', color: 'green', fontSize: 40, paddingBottom: 20 }}>
+                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                        <Text style={{textAlign: 'center', color: 'green', fontSize: 40, paddingBottom: 20}}>
                             Sign in first
                         </Text>
                         <Icon.Button
                             backgroundColor='#009900'
                             onPress={() => {
-                                const { navigate } = this.props.navigation
+                                const {navigate} = this.props.navigation
                                 navigate('UsersStack')
                             }}
                         >Okay, Sign In!
-                                </Icon.Button>
+                        </Icon.Button>
 
                     </View> : null}
                 {!this.state.isNotSignedIn ?
@@ -162,17 +205,35 @@ export default class HomeScreen extends Component {
                             style={styles.modal} isVisible={this.state.isNewPostModalVisible}
                         >
                             <View style={styles.userBar}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Button title="x" onPress={() => {
-                                        this.toggleNewPostModal()
-                                    }}>
-                                        {/*<Icon name="close" style={{ color: "black", fontSize: 32 }} />*/}
-                                    </Button>
+                                <View style={{flexDirection: 'row'}}>
+                                    <TouchableNativeFeedback
+                                        onPress={() => {
+                                            this.handleClose()
+                                        }}
+                                        // disabled={this.state.postDisabled}
+                                        background={TouchableNativeFeedback.Ripple('#990000')}
+                                    >
+                                        <Iconn
+                                            name="close"
+                                            color="#11CC11"
+                                            size={50}
+                                        />
+                                    </TouchableNativeFeedback>
+
                                 </View>
-                                <View style={{ alignItems: "center" }}>
-                                    <Button onPress={() => this.handlePost()}
-                                        title="Post"
-                                    />
+
+                                <View style={{alignItems: "center"}}>
+                                    <TouchableNativeFeedback
+                                        onPress={async () => await this.handlePost()}
+                                        disabled={this.state.postDisabled}
+                                        background={TouchableNativeFeedback.Ripple('#009900')}
+                                    >
+                                        <Iconn
+                                            name="local-post-office"
+                                            color={this.state.postDisabled ? "#D3D3D3" : "#00CC00"}
+                                            size={70}
+                                        />
+                                    </TouchableNativeFeedback>
                                 </View>
 
                             </View>
@@ -180,14 +241,20 @@ export default class HomeScreen extends Component {
                             <ScrollView>
                                 <View style={styles.userBar}>
 
-                                    <View style={{ flexDirection: 'row' }}>
+                                    <View style={{flexDirection: 'row'}}>
                                         <Image
-                                            source={{ uri: "https://lh4.googleusercontent.com/-nxzWnbmf4S0/AAAAAAAAAAI/AAAAAAAAABc/eXuoqHhvASM/photo.jpg" }}
+                                            source={{uri: this.state.user.profile_picture}}
                                             style={styles.userImage}
                                         />
+
+                                        <Text style={{
+                                            color: '#AAAAAA',
+                                            fontWeight: 'bold',
+                                            fontSize: 20
+                                        }}>  {this.state.user.firstname} {this.state.user.lastname}</Text>
                                     </View>
-                                    <View style={{ alignItems: "center" }}>
-                                        <Text style={{ fontSize: 30 }}>...</Text>
+                                    <View style={{alignItems: "center"}}>
+                                        <Text style={{fontSize: 30}}>...</Text>
                                     </View>
                                 </View>
 
@@ -197,7 +264,7 @@ export default class HomeScreen extends Component {
                                         height={this.state.height}
                                         multiline={true}
 
-                                        onChangeText={text => this.setState({ newPostText: text })}
+                                        onChangeText={text => this.setState({newPostText: text})}
                                         placeholder={"Write something ..."}
                                         numberOfLines={3}
                                         onContentSizeChange={(e) => this.updateSize(e.nativeEvent.contentSize.height)}
@@ -206,7 +273,7 @@ export default class HomeScreen extends Component {
                                 <TouchableOpacity onPress={() => this.openGallery()}><Image
                                     source={this.state.photo === 'file://undefined'
                                         ? require('../assets/images/imageThumbnail.jpg')
-                                        : { uri: this.state.photo }}
+                                        : {uri: this.state.photo}}
 
                                     style={styles.postImage}
                                 /></TouchableOpacity>
@@ -214,12 +281,19 @@ export default class HomeScreen extends Component {
                             </ScrollView>
                             <View style={styles.modalFooter}>
 
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Button title="ClickImage" onPress={() => {
-                                        this.openCamera()
-                                    }}>
-                                        {/*<Icon name="ios-image" />*/}
-                                    </Button>
+                                <View style={{flexDirection: 'row'}}>
+                                    <TouchableNativeFeedback
+                                        onPress={() => this.openCamera()}
+                                        background={TouchableNativeFeedback.Ripple('#009900')}
+                                    >
+                                        <Icon
+                                            name="camera"
+                                            color="#00CC00"
+                                            size={50}
+                                        />
+                                    </TouchableNativeFeedback>
+
+                                    {/*<Icon name="ios-image" />*/}
                                 </View>
 
                             </View>
@@ -227,17 +301,22 @@ export default class HomeScreen extends Component {
                         {/*<View style={styles.navBar}>*/}
                         {/*  <Text>AgroPost</Text>*/}
                         {/*</View>*/}
-                        <PostFeed navigation={that.props.navigation} />
+                        <PostFeed navigation={that.props.navigation}/>
                         {/*new post button*/}
                         <TouchableOpacity
                             style={{
                                 position: 'absolute',
-                                right: width/20,
-                                bottom: height/20
+                                right: 20,
+                                bottom: 20
                                 // paddingBottom: 20
 
                             }}
-                            onPress={() => { this.toggleNewPostModal() }}>
+                            onPress={() => {
+                                this.setState({
+                                    isNewPostModalVisible: true,
+                                    isPosted: false, postDisabled: false, photo: 'file://undefined'
+                                })
+                            }}>
                             <View
                                 style={{
                                     height: 60,
@@ -249,9 +328,9 @@ export default class HomeScreen extends Component {
                                 }}
                             ><Image
 
-                                    style={{ height: 30, width: 30 }}
-                                    source={require("../assets/images/icons/tweet.png")}
-                                />
+                                style={{height: 30, width: 30}}
+                                source={require("../assets/images/icons/tweet.png")}
+                            />
                             </View>
                         </TouchableOpacity>
                     </View> : null}
