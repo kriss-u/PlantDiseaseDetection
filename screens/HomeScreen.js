@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     Button,
     Dimensions,
@@ -11,16 +11,16 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import {PostFeed} from '../components/container'
+import { PostFeed } from '../components/container'
 import Modal from "react-native-modal";
 import ImagePicker from "react-native-image-picker";
 import firebase from "react-native-firebase"
 import uuid from "uuid";
-import {NavigationEvents} from 'react-navigation';
+import { NavigationEvents } from 'react-navigation';
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Iconn from 'react-native-vector-icons/MaterialIcons'
 
-import {TouchableNativeFeedback} from 'react-native';
+import { TouchableNativeFeedback } from 'react-native';
 
 const options = {
     storageOptions: {
@@ -41,7 +41,7 @@ export default class HomeScreen extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            user: 'not signed in',
+            user: '',
             isNewPostModalVisible: false,
             isNotSignedIn: true,
             textInputHeight: 40,
@@ -55,18 +55,7 @@ export default class HomeScreen extends Component {
     }
 
     componentDidMount() {
-        const {currentUser} = firebase.auth()
-        let userId = currentUser.uid
-        let ref = firebase.database().ref("users/");
-        let query = ref.orderByKey()
-            .equalTo(userId)
-        query.on("value", (snapshot) => {
-            let user = Object.values(snapshot.val())[0]
-            user.id = userId
-            this.setState({
-                user: user
-            })
-        })
+
     }
 
     handleClose = () => {
@@ -75,7 +64,7 @@ export default class HomeScreen extends Component {
         })
     }
     toggleNewPostModal = () => {
-        this.setState({isNewPostModalVisible: !this.state.isNewPostModalVisible});
+        this.setState({ isNewPostModalVisible: !this.state.isNewPostModalVisible });
     };
 
     updateSize = (height) => {
@@ -96,7 +85,7 @@ export default class HomeScreen extends Component {
     }
 
     openGallery() {
-        this.setState({name: uuid.v4()})
+        this.setState({ name: uuid.v4() })
         // Open Image Library:
         ImagePicker.launchImageLibrary(options, (response) => {
             // Same code as in above section!
@@ -121,7 +110,7 @@ export default class HomeScreen extends Component {
                     (snapshot) => {
                         console.log(snapshot.bytesTransferred);
                         let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                        this.setState({uploadProgress: progress})
+                        this.setState({ uploadProgress: progress })
                         if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                             //predict
                         }
@@ -173,6 +162,18 @@ export default class HomeScreen extends Component {
                     onDidFocus={payload => {
                         firebase.auth().onAuthStateChanged((user) => {
                             if (user) {
+                                const { currentUser } = firebase.auth()
+                                let userId = currentUser.uid
+                                let ref = firebase.database().ref("users/");
+                                let query = ref.orderByKey()
+                                    .equalTo(userId)
+                                query.on("value", (snapshot) => {
+                                    let users = Object.values(snapshot.val())[0]
+                                    users.id = userId
+                                    this.setState({
+                                        user: users
+                                    })
+                                })
                                 this.setState({
                                     isNotSignedIn: false
                                 })
@@ -185,14 +186,14 @@ export default class HomeScreen extends Component {
                     }}
                 />
                 {this.state.isNotSignedIn ?
-                    <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                        <Text style={{textAlign: 'center', color: 'green', fontSize: 40, paddingBottom: 20}}>
+                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ textAlign: 'center', color: 'green', fontSize: 40, paddingBottom: 20 }}>
                             Sign in first
                         </Text>
                         <Icon.Button
                             backgroundColor='#009900'
                             onPress={() => {
-                                const {navigate} = this.props.navigation
+                                const { navigate } = this.props.navigation
                                 navigate('UsersStack')
                             }}
                         >Okay, Sign In!
@@ -205,7 +206,7 @@ export default class HomeScreen extends Component {
                             style={styles.modal} isVisible={this.state.isNewPostModalVisible}
                         >
                             <View style={styles.userBar}>
-                                <View style={{flexDirection: 'row'}}>
+                                <View style={{ flexDirection: 'row' }}>
                                     <TouchableNativeFeedback
                                         onPress={() => {
                                             this.handleClose()
@@ -222,7 +223,7 @@ export default class HomeScreen extends Component {
 
                                 </View>
 
-                                <View style={{alignItems: "center"}}>
+                                <View style={{ alignItems: "center" }}>
                                     <TouchableNativeFeedback
                                         onPress={async () => await this.handlePost()}
                                         disabled={this.state.postDisabled}
@@ -241,9 +242,9 @@ export default class HomeScreen extends Component {
                             <ScrollView>
                                 <View style={styles.userBar}>
 
-                                    <View style={{flexDirection: 'row'}}>
+                                    <View style={{ flexDirection: 'row' }}>
                                         <Image
-                                            source={{uri: this.state.user.profile_picture}}
+                                            source={{ uri: this.state.user.profile_picture }}
                                             style={styles.userImage}
                                         />
 
@@ -253,8 +254,8 @@ export default class HomeScreen extends Component {
                                             fontSize: 20
                                         }}>  {this.state.user.firstname} {this.state.user.lastname}</Text>
                                     </View>
-                                    <View style={{alignItems: "center"}}>
-                                        <Text style={{fontSize: 30}}>...</Text>
+                                    <View style={{ alignItems: "center" }}>
+                                        <Text style={{ fontSize: 30 }}>...</Text>
                                     </View>
                                 </View>
 
@@ -264,7 +265,7 @@ export default class HomeScreen extends Component {
                                         height={this.state.height}
                                         multiline={true}
 
-                                        onChangeText={text => this.setState({newPostText: text})}
+                                        onChangeText={text => this.setState({ newPostText: text })}
                                         placeholder={"Write something ..."}
                                         numberOfLines={3}
                                         onContentSizeChange={(e) => this.updateSize(e.nativeEvent.contentSize.height)}
@@ -273,7 +274,7 @@ export default class HomeScreen extends Component {
                                 <TouchableOpacity onPress={() => this.openGallery()}><Image
                                     source={this.state.photo === 'file://undefined'
                                         ? require('../assets/images/imageThumbnail.jpg')
-                                        : {uri: this.state.photo}}
+                                        : { uri: this.state.photo }}
 
                                     style={styles.postImage}
                                 /></TouchableOpacity>
@@ -281,7 +282,7 @@ export default class HomeScreen extends Component {
                             </ScrollView>
                             <View style={styles.modalFooter}>
 
-                                <View style={{flexDirection: 'row'}}>
+                                <View style={{ flexDirection: 'row' }}>
                                     <TouchableNativeFeedback
                                         onPress={() => this.openCamera()}
                                         background={TouchableNativeFeedback.Ripple('#009900')}
@@ -301,7 +302,7 @@ export default class HomeScreen extends Component {
                         {/*<View style={styles.navBar}>*/}
                         {/*  <Text>AgroPost</Text>*/}
                         {/*</View>*/}
-                        <PostFeed navigation={that.props.navigation}/>
+                        <PostFeed navigation={that.props.navigation} />
                         {/*new post button*/}
                         <TouchableOpacity
                             style={{
@@ -328,9 +329,9 @@ export default class HomeScreen extends Component {
                                 }}
                             ><Image
 
-                                style={{height: 30, width: 30}}
-                                source={require("../assets/images/icons/tweet.png")}
-                            />
+                                    style={{ height: 30, width: 30 }}
+                                    source={require("../assets/images/icons/tweet.png")}
+                                />
                             </View>
                         </TouchableOpacity>
                     </View> : null}
