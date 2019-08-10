@@ -1,4 +1,4 @@
-import React , { Component } from 'react';
+import React, { Component } from 'react';
 import {
     Image,
     Platform,
@@ -10,7 +10,7 @@ import {
     View,
     Button,
 } from 'react-native';
-import  Icons from '../../constants/Icons'
+import Icons from '../../constants/Icons'
 import firebase from "react-native-firebase";
 import Icon from 'react-native-vector-icons/EvilIcons';
 
@@ -34,24 +34,24 @@ class Post extends Component {
             let user = Object.values(snapshot.val())[0]
             user.id = userId
             this.setState({
-                user:user
+                user: user
             })
         })
     }
     likeToggled(item) {
 
         //update upVotes
-        let writeRef = firebase.database().ref('posts/'+item.postid)
-        if(this.state.liked===false) {
+        let writeRef = firebase.database().ref('posts/' + item.postid)
+        if (this.state.liked === false) {
             writeRef.child('likes')
                 .push({
                     userid: `${item.userid}`
                 })
         }
         else {
-             let updates = {};
-             updates["/likes/" + item.likeKey] = null;
-             writeRef.update(updates);
+            let updates = {};
+            updates["/likes/" + item.likeKey] = null;
+            writeRef.update(updates);
             //     .
         }
         this.setState({
@@ -62,50 +62,53 @@ class Post extends Component {
 
     render() {
         let imageWidth = this.state.screenWidth
-        let  imageHeight= Math.floor(imageWidth*0.6)
+        let imageHeight = Math.floor(imageWidth * 0.6)
         let username = this.props.item.name
         let body = this.props.item.body
         //calculate number of likes
-        let upvotes = this.props.item.likes? Object.keys(this.props.item.likes).length:0
+        let upvotes = this.props.item.likes ? Object.keys(this.props.item.likes).length : 0
         let userPic = this.props.item.userProfilePic
         let postImage = this.props.item.imageurl
         let nav = this.props.navigation
         let item = this.props.item
         let user = this.state.user
-        const upvoteIconColor= (this.state.liked)? '#009900':null;
+        const upvoteIconColor = (this.state.liked) ? '#009900' : null;
         return (
-                <View style={{flex:1, width: 100+"%"}}>
+            <View style={{ flex: 1, width: 100 + "%" }}>
                 <TouchableOpacity
-                    onPress={() => nav.navigate('ProfilesScreen')}
+                    onPress={() => nav.navigate('OtherUsersProfilesScreen', {
+                        item: { item }
+                    })}
                 >
-                <View style={styles.userBar}>
-                    <View style={{flexDirection: 'row'}}>
-                        <Image
-                            source={{uri: userPic
-                            }}
-                            style={styles.userImage}
-                        />
-                        <Text style={{marginLeft: 10}}>{username}</Text>
-                    </View>
-                    <View style={{alignItems:"center"}}>
-                        <Text style={{fontSize: 30}}>...</Text>
-                    </View>
-                </View></TouchableOpacity>
+                    <View style={styles.userBar}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <Image
+                                source={{
+                                    uri: userPic
+                                }}
+                                style={styles.userImage}
+                            />
+                            <Text style={{ marginLeft: 10 }}>{username}</Text>
+                        </View>
+                        <View style={{ alignItems: "center" }}>
+                            <Text style={{ fontSize: 30 }}>...</Text>
+                        </View>
+                    </View></TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => nav.navigate('PostScreen',{post:item,nav:nav,user:user})}>
-                    <Text style={{marginLeft: 60,marginTop: 20}}>{body}</Text>
+                    onPress={() => nav.navigate('PostScreen', { post: item, nav: nav, user: user })}>
+                    <Text style={{ marginLeft: 60, marginTop: 20 }}>{body}</Text>
 
                     <Image
-                    source={{uri:postImage}}
+                        source={{ uri: postImage }}
 
-                    style={[styles.postImage,{width: imageWidth,height: imageHeight}]}
-                />
+                        style={[styles.postImage, { width: imageWidth, height: imageHeight }]}
+                    />
                 </TouchableOpacity>
 
                 <View style={styles.iconBar}>
                     <TouchableOpacity
-                        onPress={() =>{
+                        onPress={() => {
                             this.likeToggled(item);
                         }}>
                         <Icon
@@ -114,12 +117,12 @@ class Post extends Component {
                             size={50}
                         />
                     </TouchableOpacity>
-                   
+
                 </View>
 
                 <View style={styles.commentBar}>
                     <Text>{upvotes} UpVotes</Text>
-                    
+
 
                 </View>
                 {/*</ScrollView>*/}
@@ -132,7 +135,7 @@ class Post extends Component {
 const styles = StyleSheet.create({
 
     userBar: {
-        width: 100+"%",
+        width: 100 + "%",
         height: 20,
         backgroundColor: "rgb(255,255,255)",
         marginTop: 5,
@@ -152,20 +155,20 @@ const styles = StyleSheet.create({
     },
     iconBar: {
         height: Icons.styleConstants.rowHeight,
-        width: 100+"%",
-        borderColor:"rgb(233,233,233)",
+        width: 100 + "%",
+        borderColor: "rgb(233,233,233)",
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderTopWidth: StyleSheet.hairlineWidth
     },
-    icon:{
+    icon: {
         height: 40,
         width: 40,
         marginLeft: 5
     },
     commentBar: {
         height: Icons.styleConstants.rowHeight,
-        width: 100+"%",
-        borderColor:"rgb(233,233,233)",
+        width: 100 + "%",
+        borderColor: "rgb(233,233,233)",
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderTopWidth: StyleSheet.hairlineWidth
     },

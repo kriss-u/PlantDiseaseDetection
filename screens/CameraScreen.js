@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     PermissionsAndroid,
     Platform,
@@ -73,14 +73,14 @@ export default class CameraScreen extends Component {
 
     launchCamera(options, response) {
         let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
-        const source = {uri: path};
+        const source = { uri: path };
         this.setState({
             photo: source,
         });
         if (path !== 'file://undefined') {
-            const {navigate} = this.props.navigation;
+            const { navigate } = this.props.navigation;
             navigate('Imagee',
-                {photoss: this.state.photo});
+                { photoss: this.state.photo });
         }
     }
 
@@ -95,7 +95,7 @@ export default class CameraScreen extends Component {
 
     openGallery() {
         requestCameraPermission().then(() => {
-            this.setState({name: uuid.v4()});
+            this.setState({ name: uuid.v4() });
             // Open Image Library:
             ImagePicker.launchImageLibrary(options, (response) => {
                 // Same code as in above section!
@@ -107,7 +107,7 @@ export default class CameraScreen extends Component {
     navigateToDownload() {
         requestStoragePermission().then(() => {
             PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE).then(result => {
-                const {navigate} = this.props.navigation;
+                const { navigate } = this.props.navigation;
                 if (result === true) {
                     navigate('DownloadModels');
                 }

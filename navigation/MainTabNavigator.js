@@ -14,7 +14,8 @@ import {
     PostScreen,
     ProfilesScreen,
     RegisterScreen,
-    userScreen
+    userScreen,
+    OtherUsersProfilesScreen
 } from '../screens';
 
 const COLORS = {
@@ -26,6 +27,7 @@ const HomeStack = createStackNavigator({
     Home: HomeScreen,
     ProfilesScreen: ProfilesScreen,
     PostScreen: PostScreen,
+    OtherUsersProfilesScreen: OtherUsersProfilesScreen
 }, {
         defaultNavigationOptions: {
             title: 'Leafnosis'
@@ -90,8 +92,7 @@ const UsersStack = createSwitchNavigator({
     user: userScreen,
     LoginScreen: LoginScreen,
     RegisterScreen: RegisterScreen,
-    ProfilesScreen: ProfilesScreen,
-
+    ProfilesScreen: ProfilesScreen
 }
     /*{
         headerMode: 'none',

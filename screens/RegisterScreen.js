@@ -1,7 +1,7 @@
 import React from 'react'
-import {ScrollView, StyleSheet, View} from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import firebase from "react-native-firebase";
-import {Input} from "react-native-elements";
+import { Input } from "react-native-elements";
 import IconEntypo from "react-native-vector-icons/Entypo";
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import MCIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -23,14 +23,14 @@ export default class RegisterScreen extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
-    handleSignUp = () => {
+    handleSignUp = async () => {
         //save the context outside the .then function
         let that = this;
-        firebase
+        await firebase
             .auth()
             .createUserWithEmailAndPassword(this.state.email, this.state.password)
-            .then(function (result) {
-                firebase
+            .then(async function (result) {
+                await firebase
                     .database()
                     .ref('/users/' + result.user.uid)
                     .set({
@@ -40,11 +40,8 @@ export default class RegisterScreen extends React.Component {
                         lastname: that.state.lastName,
                         created_at: Date.now()
                     })
-                    .then(function () {
-                        this.props.navigation.navigate('ProfilesScreen');
-                    })
             })
-            .catch(error => this.setState({errorMessage: error.message}))
+            .catch(error => this.setState({ errorMessage: error.message }))
     };
 
     handleChange = (type, value) => {

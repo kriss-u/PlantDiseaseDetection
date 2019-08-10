@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
     View,
     Text,
@@ -9,8 +9,8 @@ import {
     ToastAndroid,
     TouchableNativeFeedback
 } from 'react-native';
-import {ListItem, SearchBar} from 'react-native-elements';
-import {TouchableHighlight} from 'react-native';
+import { ListItem, SearchBar } from 'react-native-elements';
+import { TouchableHighlight } from 'react-native';
 import firebase from 'react-native-firebase';
 import Modal from "react-native-modal";
 import NetInfo from "@react-native-community/netinfo";
@@ -66,11 +66,11 @@ export default class DownloadableModels extends Component {
     }
 
     toggleDownloadModal = () => {
-        this.setState({isDownloadModalVisible: !this.state.isDownloadModalVisible});
+        this.setState({ isDownloadModalVisible: !this.state.isDownloadModalVisible });
     };
 
     makeRemoteRequest = () => {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         try {
             firebase.database().ref('models/').on('value', (snapshot) => {
                 let x = {};
@@ -84,7 +84,7 @@ export default class DownloadableModels extends Component {
                 this.arrayholder = res
             })
         } catch (error) {
-            this.setState({error, loading: false});
+            this.setState({ error, loading: false });
         }
     };
 
@@ -141,12 +141,10 @@ export default class DownloadableModels extends Component {
             .equalTo(item.name)
         query.on("value", (snapshot) => {
             console.log(snapshot)
-            AsyncStorage.clear()
-
             AsyncStorage.setItem(`_${item.name}`, JSON.stringify(snapshot._value));
 
         })
-        };
+    };
 
     downloadLabel = (item) => {
         if (this.state.isInternetConnected) {
@@ -199,7 +197,7 @@ export default class DownloadableModels extends Component {
                 firebase.storage.TaskEvent.STATE_CHANGED,
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                    this.setState({downloadProgress: progress});
+                    this.setState({ downloadProgress: progress });
 
                     if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
                         // complete
@@ -231,13 +229,13 @@ export default class DownloadableModels extends Component {
     render() {
         if (this.state.loading) {
             return (
-                <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-                    <ActivityIndicator/>
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator />
                 </View>
             );
         }
         return (
-            <View style={{flex: 1}}>
+            <View style={{ flex: 1 }}>
                 <Modal
                     style={{
                         flex: 1,
@@ -255,19 +253,19 @@ export default class DownloadableModels extends Component {
                             this.toggleDownloadModal()
                         }}>
                         <View>
-                            <Progress.Circle progress={this.state.downloadProgress} size={200} showsText={true}/>
-                            <Text style={{color: "#FFFF00"}}>Downloading Model {this.state.currentItem}!</Text>
+                            <Progress.Circle progress={this.state.downloadProgress} size={200} showsText={true} />
+                            <Text style={{ color: "#FFFF00" }}>Downloading Model {this.state.currentItem}!</Text>
 
                         </View>
                     </TouchableNativeFeedback>
                 </Modal>
                 <FlatList
                     data={this.state.data}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                         <ListItem onPress={() => this.download(item)}
                             // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
-                                  title={`${item.name}`}
-                                  subtitle={item.modelName}
+                            title={`${item.name}`}
+                            subtitle={item.modelName}
                         />
                     )}
                     keyExtractor={item => item.modelName}

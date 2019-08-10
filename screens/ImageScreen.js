@@ -204,6 +204,7 @@ export default class ImageScreen extends Component {
                 // console.log(responseJson)
                 let response = responseJson
                 let array = []
+                console.log(responseJson)
                 response.forEach(data => {
                     let object = {}
                     object.species = data[2][0]
@@ -366,7 +367,7 @@ export default class ImageScreen extends Component {
                 <View style={{ flexDirection: 'row', height: 100 }}>
                     <TouchableOpacity style={{
                         flex: 1,
-                        backgroundColor: '#6000FF',
+                        backgroundColor: '#009900',
                         justifyContent: 'center',
                         alignItems: 'center',
                         borderColor: '#FFFFFF'
@@ -377,7 +378,7 @@ export default class ImageScreen extends Component {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        style={{ flex: 1, backgroundColor: '#6000FF', justifyContent: 'center', alignItems: 'center' }}
+                        style={{ flex: 1, backgroundColor: '#009900', justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => this.remoteDiagnosis(photoToBeChecked.uri)}>
                         <Text style={{ color: '#FFFFFF' }}>
                             Remote Diagnosis
@@ -385,7 +386,7 @@ export default class ImageScreen extends Component {
                     </TouchableOpacity>
                     <TouchableOpacity
                         disabled={!this.state.checked}
-                        style={{ flex: 1, backgroundColor: `${this.state.checked ? '#6000FF' : '#D3D3D3'}`, justifyContent: 'center', alignItems: 'center' }}
+                        style={{ flex: 1, backgroundColor: `${this.state.checked ? '#009900' : '#D3D3D3'}`, justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => {
                             this.togglePredictionModal(),
                                 setTimeout(() => this.localDiagnosis(photoToBeChecked.uri), 2000)
