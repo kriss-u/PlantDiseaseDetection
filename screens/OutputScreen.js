@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, ScrollView, AsyncStorage, Image } from 'react-native';
+import {View, FlatList, ScrollView, AsyncStorage, Image, Dimensions} from 'react-native';
 import firebase from "react-native-firebase";
 import NetInfo from "@react-native-community/netinfo";
 import { ListItem, Text } from 'react-native-elements';
@@ -18,7 +18,9 @@ export default class OutputScreen extends Component {
             isControlVisible: false,
             isSymptomsVisible: false,
             isSpeciesImagesVisible: false,
-            isDiseaseImagesVisible: false
+            isDiseaseImagesVisible: false,
+            screenWidth: Dimensions.get("window").width,
+
         };
     }
 
@@ -144,6 +146,8 @@ export default class OutputScreen extends Component {
 
     render() {
         let i = 1;
+        let imageWidth = this.state.screenWidth
+        let imageHeight = Math.floor(imageWidth * 0.6)
         return (
             <ScrollView>
                 <View>
@@ -226,8 +230,8 @@ export default class OutputScreen extends Component {
                                             uri: img
                                         }}
                                         style={{
-                                            height: 200,
-                                            width: 200
+                                            resizeMode: 'contain',
+                                            marginTop: 30,height:imageHeight,width:imageWidth
                                         }}>
                                     </Image>
                                 </View>
@@ -359,8 +363,8 @@ export default class OutputScreen extends Component {
                                                         uri: img
                                                     }}
                                                     style={{
-                                                        height: 200,
-                                                        width: 200
+                                                        resizeMode: 'contain',
+                                                        marginTop: 30,height:imageHeight,width:imageWidth
                                                     }}>
                                                 </Image>
                                             </View>
