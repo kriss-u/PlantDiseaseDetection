@@ -35,15 +35,18 @@ export default class PostScreen extends Component {
                if(snapshot._value===null){
                    return 0
                }
-                let comments = Object.keys(snapshot._value).map(function (key) {
-                    return snapshot._value[key]
-                })
-                console.log(comments)
+                let comments = snapshot._value
+                //order the comments by key
+                let c = []
+                let keys = Object.keys(comments).sort()
+                for (let i = 0;i<keys.length;i++){
+
+                    c.push(comments[keys[i]])
+                }
                 let count = 0
-                const sampleCommentsRaw = comments
+                let sampleCommentsRaw = c
                 //count and
                 sampleCommentsRaw.forEach(c => {
-                    console.log(c)
                     if (c.children) {
                         let a = []
                         if(c.children.constructor!==Array){

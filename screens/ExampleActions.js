@@ -7,21 +7,24 @@ import firebase from "react-native-firebase";
 
 
 export function getComments(sampleComments) {
+  let itemNum = 0
   let c = []
-    console.log(sampleComments)
-
     if(sampleComments.constructor===Array){
         c = [...sampleComments]
-        console.log(c)
+      if(c.length<3){
+        itemNum = c.length
+      }
+      else
+        itemNum = 3
 
     }else{
-  let keys = Object.keys(sampleComments).sort()
-  console.log(keys)
-  for (let i = 0;i<keys.length;i++){
-
-    c.push(sampleComments[keys[i]])
-  }}
-  return c.splice(c.length-5);
+      let keys = Object.keys(sampleComments).sort()
+      for (let i = 0;i<keys.length;i++){
+        c.push(sampleComments[keys[i]])
+      }
+    itemNum = c.length
+    }
+  return c.splice(c.length-itemNum);
 }
 
 export function paginateComments(sampleComments,
@@ -42,6 +45,7 @@ export function paginateComments(sampleComments,
 
       const part = c.slice(start, lastIndex);
       console.log(start, lastIndex);
+      console.log(part)
       comments = [...part, ...comments];
     }
   } else {
@@ -177,7 +181,6 @@ export function save(sampleComments,comments, text, parentCommentId, date, user,
 
   const com = {
     parentId: null,
-    commentId: lastCommentId + 1,
     created_at: date,
     updated_at: date,
     liked: false,
@@ -191,8 +194,13 @@ export function save(sampleComments,comments, text, parentCommentId, date, user,
 
   if (!parentCommentId) {
 
-    comments.push(com);
-    firebase.database().ref('comments/'+com.commentId).set(com)
+    //comments.push(com);
+
+    let writef = firebase.database().ref('comments/').push()
+    com.commentId = writef.key
+    writef.set(com).then(function (snapshot) {
+      console.log(snapshot)
+    });
     let writeRef=firebase.database().ref('posts/'+postid)
     writeRef.once("value",(snapshot) => {
       let updates = {};
