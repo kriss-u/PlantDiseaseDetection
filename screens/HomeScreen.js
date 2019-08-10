@@ -110,8 +110,7 @@ export default class HomeScreen extends Component {
                         body: this.state.newPostText,
                         comments: 0,
                         imageurl: imageUri,
-                        upVotes: 0,
-                        userid: 0,
+                        userid:  firebase.auth().currentUser.uid,
                         postid: key
                     })
                     .then(function (snapshot) {
@@ -233,8 +232,8 @@ export default class HomeScreen extends Component {
                         <TouchableOpacity
                             style={{
                                 position: 'absolute',
-                                right: 30,
-                                bottom: 30
+                                right: width/20,
+                                bottom: height/20
                                 // paddingBottom: 20
 
                             }}

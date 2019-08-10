@@ -263,7 +263,7 @@ export default class DownloadableModels extends Component {
                     data={this.state.data}
                     renderItem={({ item }) => (
                         <ListItem onPress={() => this.download(item)}
-                            // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                            leftAvatar={{ source: { uri: item.image } }}
                             title={`${item.name}`}
                             subtitle={item.modelName}
                         />

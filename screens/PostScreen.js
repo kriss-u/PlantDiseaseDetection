@@ -32,17 +32,30 @@ export default class PostScreen extends Component {
     componentDidMount=()=> {
         if(true) {
             firebase.database().ref('comments/').orderByChild('postid').equalTo(this.item.postid).on('value', (snapshot) => {
-                console.log(snapshot)
-                let comments = Object.keys(snapshot._value).map(function (key) {
-                    return snapshot._value[key]
-                })
-                console.log(comments)
+               if(snapshot._value===null){
+                   return 0
+               }
+                let comments = snapshot._value
+                //order the comments by key
+                let c = []
+                let keys = Object.keys(comments).sort()
+                for (let i = 0;i<keys.length;i++){
+
+                    c.push(comments[keys[i]])
+                }
                 let count = 0
-                const sampleCommentsRaw = comments
+                let sampleCommentsRaw = c
                 //count and
                 sampleCommentsRaw.forEach(c => {
-                    console.log(c)
                     if (c.children) {
+                        let a = []
+                        if(c.children.constructor!==Array){
+                            let keys = Object.keys(c.children).sort()
+                            for (let i = 0;i<keys.length;i++){
+
+                                a.push(c.children[keys[i]])
+                            }}
+                        c.children = a;
                         c.childrenCount = c.children.length;
                     }
                     firebase.database().ref('users/').orderByKey().equalTo(`${c.userid}`).on('value', (snapshot1) => {
@@ -92,6 +105,7 @@ export default class PostScreen extends Component {
     }
 
     extractImage(c) {
+
         try {
             return c.userProfilePic !== "" ? c.userProfilePic : "";
         } catch (e) {
@@ -151,7 +165,7 @@ export default class PostScreen extends Component {
 
     render() {
         let nav = this.props.navigation.getParam('nav')
-        let post = this.props.navigation.getParam('post')
+        this.item = this.props.navigation.getParam('post')
         let user = this.props.navigation.getParam('user')
         const review = this.state.review;
         const data = this.state.comments;
@@ -169,8 +183,8 @@ export default class PostScreen extends Component {
                     this.scrollIndex = event.nativeEvent.contentOffset.y;
                 }}
                 ref={"scrollView"}
-            ><View style={{marginTop:8}}><Post item={post} navigation={nav}/></View>
-                {this.state.comments.length ? (
+            ><View style={{marginTop:8}}><Post item={this.item} navigation={nav}/></View>
+
                     <Comments
                         data={data}
                         //To compare is user the owner
@@ -226,7 +240,7 @@ export default class PostScreen extends Component {
                                 parentCommentId,
                                 date,
                                 user,
-                                post.id
+                                this.item.postid
                             );
                             this.setState({
                                 comments: comments
@@ -299,7 +313,7 @@ export default class PostScreen extends Component {
                             }, 3000);
                         }}
                     />
-                ) : null}
+
             </ScrollView>
         );
     }

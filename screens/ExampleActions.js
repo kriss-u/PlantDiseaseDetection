@@ -7,21 +7,24 @@ import firebase from "react-native-firebase";
 
 
 export function getComments(sampleComments) {
+  let itemNum = 0
   let c = []
-    console.log(sampleComments)
-
     if(sampleComments.constructor===Array){
         c = [...sampleComments]
-        console.log(c)
+      if(c.length<3){
+        itemNum = c.length
+      }
+      else
+        itemNum = 3
 
     }else{
-  let keys = Object.keys(sampleComments).sort()
-  console.log(keys)
-  for (let i = 0;i<keys.length;i++){
-
-    c.push(sampleComments[keys[i]])
-  }}
-  return c.splice(c.length-2);
+      let keys = Object.keys(sampleComments).sort()
+      for (let i = 0;i<keys.length;i++){
+        c.push(sampleComments[keys[i]])
+      }
+    itemNum = c.length
+    }
+  return c.splice(c.length-itemNum);
 }
 
 export function paginateComments(sampleComments,
@@ -42,6 +45,7 @@ export function paginateComments(sampleComments,
 
       const part = c.slice(start, lastIndex);
       console.log(start, lastIndex);
+      console.log(part)
       comments = [...part, ...comments];
     }
   } else {
@@ -154,21 +158,19 @@ export function deleteComment(comments, cmnt) {
 function updateReply(item){
   //update upVotes
   let writeRef = firebase.database().ref('comments/'+item.parentId)
-
-    let updates = {};
-    updates["/children/" + item.likeKey] = null;
-    writeRef.update(updates);
-    //     .
+    writeRef.child('children')
+        .push(item)
 
 }
 export function save(sampleComments,comments, text, parentCommentId, date, user, postid) {
   // find last comment id
-  let lastCommentId = 0;
+  let lastCommentId = -2;
   sampleComments.forEach(c => {
     if (c.commentId > lastCommentId) {
       lastCommentId = c.commentId;
     }
     if (c.children) {
+
       c.children.forEach(c2 => {
         if (c2.commentId > lastCommentId) {
           lastCommentId = c2.commentId;
@@ -179,20 +181,33 @@ export function save(sampleComments,comments, text, parentCommentId, date, user,
 
   const com = {
     parentId: null,
-    commentId: lastCommentId + 1,
     created_at: date,
     updated_at: date,
     liked: false,
     reported: false,
     body: text,
+    name: user.firstname+' '+user.lastname,
+    userProfilePic: user.profile_picture,
     userid: user.id,
     postid: postid
   };
 
   if (!parentCommentId) {
 
-    comments.push(com);
-    firebase.database().ref('comments/'+com.commentId).set(com)
+    //comments.push(com);
+
+    let writef = firebase.database().ref('comments/').push()
+    com.commentId = writef.key
+    writef.set(com).then(function (snapshot) {
+      console.log(snapshot)
+    });
+    let writeRef=firebase.database().ref('posts/'+postid)
+    writeRef.once("value",(snapshot) => {
+      let updates = {};
+      updates["comments"] = snapshot._value.comments+1;
+      writeRef.update(updates);
+    } )
+
 
   } else {
     comments.find(c => {
