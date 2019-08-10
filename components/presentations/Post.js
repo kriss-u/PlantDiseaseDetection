@@ -13,6 +13,15 @@ import {
 import Icons from '../../constants/Icons'
 import firebase from "react-native-firebase";
 import Icon from 'react-native-vector-icons/EvilIcons';
+import FontIcon from 'react-native-vector-icons/FontAwesome5';
+
+import { MenuProvider } from 'react-native-popup-menu';
+import {
+    Menu,
+    MenuOptions,
+    MenuOption,
+    MenuTrigger,
+} from 'react-native-popup-menu';
 
 
 class Post extends Component {
@@ -37,6 +46,17 @@ class Post extends Component {
                 user: user
             })
         })
+    }
+    deletePost(item){
+        if(item.userid===this.state.user.id) {
+            let updates = {};
+            let writeRef = firebase.database().ref('posts/')
+            updates[item.postid] = null;
+            writeRef.update(updates);
+        }
+        else
+            alert('This is not your post')
+
     }
     likeToggled(item) {
 
@@ -76,13 +96,15 @@ class Post extends Component {
         let user = this.state.user
         const upvoteIconColor = (this.state.liked) ? '#009900' : null;
         return (
+            <MenuProvider>
+
             <View style={{ flex: 1, width: 100 + "%" }}>
-                <TouchableOpacity
-                    onPress={() => nav.navigate('OtherUsersProfilesScreen', {
-                        item: { userid }
-                    })}
-                >
                     <View style={styles.userBar}>
+                        <TouchableOpacity
+                            onPress={() => nav.navigate('OtherUsersProfilesScreen', {
+                                item: { userid }
+                            })}
+                        >
                         <View style={{ flexDirection: 'row' }}>
                             <Image
                                 source={{
@@ -92,16 +114,34 @@ class Post extends Component {
                             />
                             <Text style={{ marginLeft: 10 }}>{username}</Text>
                         </View>
-                        <View style={{ alignItems: "center" }}>
-                            <Text style={{ fontSize: 30 }}>...</Text>
-                        </View>
-                    </View></TouchableOpacity>
+                </TouchableOpacity>
 
+                        <View style={{ alignItems: "center" }}>
+                                    <Menu>
+                                        <MenuTrigger>
+                                            <Text style={{fontSize:30,paddingRight:6}}>
+                                                <FontIcon
+                                                    name="ellipsis-v"
+                                                    size={20}
+                                                />
+                                            </Text>
+                                        </MenuTrigger>
+                                        <MenuOptions>
+                                            <MenuOption onSelect={() => this.deletePost(item)} >
+                                                <Text style={{color: 'red',fontSize:20}}>Delete Post</Text>
+                                            </MenuOption>
+                                        </MenuOptions>
+                                    </Menu>
+                        </View>
+
+                    </View>
+
+
+                <Text style={{ marginLeft: 60, marginTop: 20 }}>{body}</Text>
                 <TouchableOpacity
                     onPress={() => nav.navigate('PostScreen', { post: item, nav: nav, user: user })}>
-                    <Text style={{ marginLeft: 60, marginTop: 20 }}>{body}</Text>
 
-                    <Image
+                <Image
                         source={{ uri: postImage }}
 
                         style={[styles.postImage, { width: imageWidth, height: imageHeight }]}
@@ -136,6 +176,7 @@ class Post extends Component {
                 </View>
                 {/*</ScrollView>*/}
             </View>
+    </MenuProvider>
 
         )
     }
