@@ -14,6 +14,8 @@ import uuid from 'uuid';
 import Tflite from 'tflite-react-native';
 import { NavigationEvents } from 'react-navigation';
 import NetInfo from "@react-native-community/netinfo";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import { showInternetConnectedToast, showNoInternetToast } from "../components/container/DownloadableModels";
 
 let tflite = new Tflite();
@@ -313,7 +315,7 @@ export default class ImageScreen extends Component {
                         data={this.state.data}
                         renderItem={({ item }) => (
                             <ListItem onPress={() => this.selectSpecies(item)}
-                                // leftAvatar={{ source: { uri: item.picture.thumbnail } }}
+                                      leftAvatar={{ source: { uri: item.image } }}
                                 title={`${item.name}`}
                                 subtitle={item.modelName}
                             />
@@ -367,19 +369,26 @@ export default class ImageScreen extends Component {
                 <View style={{ flexDirection: 'row', height: 100 }}>
                     <TouchableOpacity style={{
                         flex: 1,
-                        backgroundColor: '#009900',
+                        backgroundColor: '#990000',
                         justifyContent: 'center',
                         alignItems: 'center',
                         borderColor: '#FFFFFF'
                     }}
                         onPress={() => this.props.navigation.goBack()}>
-                        <Text style={{ color: '#FFFFFF' }}>
-                            Cancel
-                        </Text>
+                        <Icon
+                            name="close-box"
+                            color="white"
+                            size={50}
+                        />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{ flex: 1, backgroundColor: '#009900', justifyContent: 'center', alignItems: 'center' }}
                         onPress={() => this.remoteDiagnosis(photoToBeChecked.uri)}>
+                        <Icon
+                            name="wifi"
+                            color="white"
+                            size={40}
+                        />
                         <Text style={{ color: '#FFFFFF' }}>
                             Remote Diagnosis
                         </Text>
@@ -391,6 +400,11 @@ export default class ImageScreen extends Component {
                             this.togglePredictionModal(),
                                 setTimeout(() => this.localDiagnosis(photoToBeChecked.uri), 2000)
                         }}>
+                        <Icon
+                            name="wifi-off"
+                            color="white"
+                            size={40}
+                        />
                         <Text style={{ color: `${this.state.checked ? '#FFFFFF' : '#000000'}` }}>
                             Local Diagnosis
                         </Text>
