@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, ScrollView, AsyncStorage } from 'react-native';
+import { View, FlatList, ScrollView, AsyncStorage, Image } from 'react-native';
 import firebase from "react-native-firebase";
 import NetInfo from "@react-native-community/netinfo";
 import { ListItem, Text } from 'react-native-elements';
@@ -10,11 +10,14 @@ export default class OutputScreen extends Component {
         this.state = {
             disease: {},
             species: {},
+            speciesImages: [],
+            diseaseImages: [],
             isInternetConnected: false,
             isDescriptionVisible: false,
             isCauseVisible: false,
             isControlVisible: false,
-            isSymptomsVisible: false
+            isSymptomsVisible: false,
+            isSpeciesImagesVisible: false
         };
     }
 
@@ -36,6 +39,7 @@ export default class OutputScreen extends Component {
                 .equalTo(species)
             query.on("value", (snapshot) => {
                 snapshot.forEach((child) => {
+                    console.log(child)
                     if (disease.disease !== 'h') {
                         species = child.val()
                         diseaseDetail = child.val().diseases.filter(function (childDisease) {
@@ -44,7 +48,8 @@ export default class OutputScreen extends Component {
                     }
                     this.setState({
                         disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
-                        species: species
+                        species: species,
+                        speciesImages: species.imageLink
                     })
                 });
             });
@@ -105,6 +110,12 @@ export default class OutputScreen extends Component {
     toggleSymptoms = () => {
         this.setState({
             isSymptomsVisible: !this.state.isSymptomsVisible
+        })
+    }
+
+    toggleSpeciesImages = () => {
+        this.setState({
+            isSpeciesImagesVisible: !this.state.isSpeciesImagesVisible
         })
     }
 
@@ -177,6 +188,38 @@ export default class OutputScreen extends Component {
                             ></ListItem>}
                         keyExtractor={item => item}
                     /> : null}
+                    {this.renderSeparator()}
+                    {(this.state.speciesImages !== undefined || this.state.speciesImages.length !== 0) ?
+                        <FlatList
+                            data={[`${this.state.speciesImages}`]}
+                            renderItem={({ item }) =>
+                                <ListItem
+
+                                    title={<Text><Text h4>Image:</Text> <Text style={{ fontSize: 20 }}>(Touch to see)</Text></Text>}
+                                    onPress={() => this.toggleSpeciesImages()}
+                                ></ListItem>}
+                            keyExtractor={item => item}
+                        />
+                        :
+                        null}
+                    {/* {this.state.isSpeciesImagesVisible ? */}
+                    {this.state.speciesImages.forEach(img => {
+                        return (
+                            <View>
+                                <Text>{img}</Text>
+                                <Image
+                                    source={{
+                                        uri: img
+                                    }}
+                                    style={{
+                                        height: 200,
+                                        width: 200
+                                    }}>
+                                </Image>
+                            </View>
+                        )
+                    })}
+                    {/* : null} */}
                     {this.renderSeparator()}
                     {this.renderSeparator()}
                     {

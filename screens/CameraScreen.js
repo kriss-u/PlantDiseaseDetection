@@ -13,10 +13,31 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import uuid from 'uuid';
 
-const options = {
+// const options = {
+//     storageOptions: {
+//         skipBackup: true,
+//         path: 'images',
+//     },
+// };
+
+const optionsCamera = {
+    mediaType: 'photo',
+    maxWidth: 1024,
+    maxHeight: 1024,
+    quality: 1,
     storageOptions: {
         skipBackup: true,
         path: 'images',
+    },
+};
+
+const optionsGallery = {
+    mediaType: 'photo',
+    maxWidth: 1024,
+    maxHeight: 1024,
+    quality: 1,
+    storageOptions: {
+        skipBackup: true
     },
 };
 
@@ -71,8 +92,9 @@ export default class CameraScreen extends Component {
         super(props);
     }
 
-    launchCamera(options, response) {
+    launchImageScreen(options, response) {
         let path = Platform.OS === 'ios' ? response.uri : 'file://' + response.path;
+        // console.log(response);
         const source = { uri: path };
         this.setState({
             photo: source,
@@ -87,8 +109,8 @@ export default class CameraScreen extends Component {
     openCamera() {
         requestCameraPermission().then(() => {
             // Launch Camera:
-            ImagePicker.launchCamera(options, (response) => {
-                this.launchCamera(options, response);
+            ImagePicker.launchCamera(optionsCamera, (response) => {
+                this.launchImageScreen(optionsCamera, response);
             });
         });
     }
@@ -97,9 +119,9 @@ export default class CameraScreen extends Component {
         requestCameraPermission().then(() => {
             this.setState({ name: uuid.v4() });
             // Open Image Library:
-            ImagePicker.launchImageLibrary(options, (response) => {
+            ImagePicker.launchImageLibrary(optionsGallery, (response) => {
                 // Same code as in above section!
-                this.launchCamera(options, response);
+                this.launchImageScreen(optionsGallery, response);
             });
         });
     }
