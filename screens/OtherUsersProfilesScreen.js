@@ -1,10 +1,7 @@
 import React from 'react';
-import { Button, PermissionsAndroid, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Image } from 'react-native';
 import { Text } from 'react-native-elements';
 import firebase from 'react-native-firebase'
-import { GoogleSignin } from "react-native-google-signin";
-import FAIcon from "react-native-vector-icons/FontAwesome5";
-import uuid from "uuid";
 
 export default class ProfilesScreen extends React.Component {
     constructor(props) {
@@ -13,75 +10,8 @@ export default class ProfilesScreen extends React.Component {
             firstName: '',
             lastName: '',
             email: '',
-            posts: [],
             error: [],
-            uploadProgress: 0
-        }
-    }
-    handleProfileUpload = async (uri) => {
-        const name = uuid.v4()
-        const ref = firebase.storage().ref("/images/").child(name);
-        const unsubscribe = ref.putFile(uri).on(
-            firebase.storage.TaskEvent.STATE_CHANGED,
-            (snapshot) => {
-                console.log(snapshot.bytesTransferred);
-                let progress = (snapshot.bytesTransferred / snapshot.totalBytes);
-                this.setState({ uploadProgress: progress })
-                if (snapshot.state === firebase.storage.TaskState.SUCCESS) {
-                    //predict
-                }
-            },
-            (error) => {
-                unsubscribe();
-                console.error(error);
-            }, () => {
-                this.setState({ uploadProgress: 0 })
-                this.predictOnline(name)
-            })
-    }
-    requestCameraPermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.requestMultiple(
-                [PermissionsAndroid.PERMISSIONS.CAMERA, PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE]
-                /*{
-                    title: 'Leafnosis Permissions',
-                    message: ':( Sorry, we need camera and storage permissions to capture and save photo. Please grant them, otherwise you cannot capture photos',
-                    // buttonNeutral: 'Ask Me Later',
-                    // buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },*/
-            );
-            const grantedLog = Object.values(granted);
-
-            if (grantedLog.includes('denied')) {
-                console.log('Permission denied');
-            } else {
-                console.log('Permission granted');
-            }
-        } catch (err) {
-            console.warn(err);
-        }
-    }
-
-    requestStoragePermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-                /*{
-                    title: 'Leafnosis Permissions',
-                    message: ':( Sorry, we need storage permission read your photo. Please grant it, otherwise you we cannot read photos',
-                    // buttonNeutral: 'Ask Me Later',
-                    // buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                },*/
-            );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('Permission granted');
-            } else {
-                console.log('Permission denied');
-            }
-        } catch (err) {
-            console.warn(err);
+            profile_picture: ''
         }
     }
 
@@ -96,7 +26,8 @@ export default class ProfilesScreen extends React.Component {
             this.setState({
                 firstName: user.firstname,
                 lastName: user.lastname,
-                email: user.email
+                email: user.email,
+                profile_picture: user.profile_picture
             })
         })
     }
@@ -108,7 +39,14 @@ export default class ProfilesScreen extends React.Component {
                     <View style={styles.nameContainer}>
                         <Text h1 style={styles.textStyle}>{this.state.firstName} {this.state.lastName}</Text>
                         <Text h2 style={styles.textStyle}>{this.state.email ? this.state.email : 'Place for Email'}</Text>
-                        <Text h2 style={styles.textStyle}>Place for photo</Text>
+                        {this.state.profile_picture ?
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Image
+                                    source={{
+                                        uri: this.state.profile_picture
+                                    }}
+                                    style={styles.userImage}
+                                /></View> : null}
                     </View>
                 </View>
             </ScrollView>
@@ -135,5 +73,10 @@ const styles = StyleSheet.create({
     },
     nameContainer: {
         flex: 1,
+    },
+    userImage: {
+        height: 300,
+        width: 300,
+        borderRadius: 300
     }
 });

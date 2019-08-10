@@ -30,7 +30,10 @@ const HomeStack = createStackNavigator({
     OtherUsersProfilesScreen: OtherUsersProfilesScreen
 }, {
         defaultNavigationOptions: {
-            title: 'Leafnosis'
+            title: 'Leafnosis',
+            headerTitleStyle: {
+                color: '#009900'
+            }
         }
     }
     /*{
@@ -62,7 +65,9 @@ const CameraStack = createStackNavigator({
 }, {
         defaultNavigationOptions: {
             title: 'Leafnosis',
-            headerPressColorAndroid: "#009900"
+            headerTitleStyle: {
+                color: '#009900'
+            }
         }
     }
     /*{

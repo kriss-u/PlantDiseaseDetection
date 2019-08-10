@@ -11,13 +11,14 @@ export default class OutputScreen extends Component {
             disease: {},
             species: {},
             speciesImages: [],
-            diseaseImages: [],
+            diseaseImages: undefined,
             isInternetConnected: false,
             isDescriptionVisible: false,
             isCauseVisible: false,
             isControlVisible: false,
             isSymptomsVisible: false,
-            isSpeciesImagesVisible: false
+            isSpeciesImagesVisible: false,
+            isDiseaseImagesVisible: false
         };
     }
 
@@ -49,7 +50,10 @@ export default class OutputScreen extends Component {
                     this.setState({
                         disease: diseaseDetail[0] !== "undefined" ? diseaseDetail[0] : '',
                         species: species,
-                        speciesImages: species.imageLink
+                        speciesImages: species.imageLink,
+                        diseaseImages: diseaseDetail[0] !== "undefined" ? diseaseDetail[0].imageLink : undefined,
+                    }, () => {
+                        console.log(this.state.diseaseImages)
                     })
                 });
             });
@@ -118,6 +122,13 @@ export default class OutputScreen extends Component {
             isSpeciesImagesVisible: !this.state.isSpeciesImagesVisible
         })
     }
+
+    toggleDiseaseImages = () => {
+        this.setState({
+            isDiseaseImagesVisible: !this.state.isDiseaseImagesVisible
+        })
+    }
+
 
     renderSeparator = () => {
         return (
@@ -189,37 +200,41 @@ export default class OutputScreen extends Component {
                         keyExtractor={item => item}
                     /> : null}
                     {this.renderSeparator()}
-                    {(this.state.speciesImages !== undefined || this.state.speciesImages.length !== 0) ?
+                    {(this.state.speciesImages !== undefined) ?
                         <FlatList
                             data={[`${this.state.speciesImages}`]}
                             renderItem={({ item }) =>
                                 <ListItem
 
-                                    title={<Text><Text h4>Image:</Text> <Text style={{ fontSize: 20 }}>(Touch to see)</Text></Text>}
+                                    title={<Text><Text h4>Images:</Text> <Text style={{ fontSize: 20 }}>(Touch to see)</Text></Text>}
                                     onPress={() => this.toggleSpeciesImages()}
                                 ></ListItem>}
                             keyExtractor={item => item}
                         />
                         :
                         null}
-                    {/* {this.state.isSpeciesImagesVisible ? */}
-                    {this.state.speciesImages.forEach(img => {
-                        return (
-                            <View>
-                                <Text>{img}</Text>
-                                <Image
-                                    source={{
-                                        uri: img
-                                    }}
-                                    style={{
-                                        height: 200,
-                                        width: 200
-                                    }}>
-                                </Image>
-                            </View>
-                        )
-                    })}
-                    {/* : null} */}
+                    {this.state.isSpeciesImagesVisible ?
+
+                        this.state.speciesImages.map(img => {
+                            return (
+                                <View style={{
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
+                                }}>
+                                    <Image
+                                        source={{
+                                            uri: img
+                                        }}
+                                        style={{
+                                            height: 200,
+                                            width: 200
+                                        }}>
+                                    </Image>
+                                </View>
+                            )
+                        })
+
+                        : null}
                     {this.renderSeparator()}
                     {this.renderSeparator()}
                     {
@@ -317,6 +332,42 @@ export default class OutputScreen extends Component {
                                             ></ListItem>}
                                         keyExtractor={item => item}
                                     /> : null}
+                                {this.renderSeparator()}
+                                {!!this.state.diseaseImages ?
+                                    <FlatList
+                                        data={[`${this.state.diseaseImages}`]}
+                                        renderItem={({ item }) =>
+                                            <ListItem
+
+                                                title={<Text><Text h4>Images:</Text> <Text style={{ fontSize: 20 }}>(Touch to see)</Text></Text>}
+                                                onPress={() => this.toggleDiseaseImages()}
+                                            ></ListItem>}
+                                        keyExtractor={item => item}
+                                    />
+                                    :
+                                    null}
+                                {this.state.isDiseaseImagesVisible ?
+
+                                    this.state.diseaseImages.map(img => {
+                                        return (
+                                            <View style={{
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Image
+                                                    source={{
+                                                        uri: img
+                                                    }}
+                                                    style={{
+                                                        height: 200,
+                                                        width: 200
+                                                    }}>
+                                                </Image>
+                                            </View>
+                                        )
+                                    })
+
+                                    : null}
                                 {this.renderSeparator()}
                             </View> :
                             <View>
