@@ -15,7 +15,7 @@ const options = {
     },
 };
 
-requestCameraPermission = async () => {
+async function requestCameraPermission  (){
     try {
         const granted = await PermissionsAndroid.requestMultiple(
             [PermissionsAndroid.PERMISSIONS.CAMERA, PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE]
@@ -39,27 +39,6 @@ requestCameraPermission = async () => {
     }
 }
 
-requestStoragePermission = async () => {
-    try {
-        const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
-            /*{
-                title: 'Leafnosis Permissions',
-                message: ':( Sorry, we need storage permission read your photo. Please grant it, otherwise you we cannot read photos',
-                // buttonNeutral: 'Ask Me Later',
-                // buttonNegative: 'Cancel',
-                buttonPositive: 'OK',
-            },*/
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log('Permission granted');
-        } else {
-            console.log('Permission denied');
-        }
-    } catch (err) {
-        console.warn(err);
-    }
-}
 
 
 export default class ProfilesScreen extends React.Component {
@@ -186,7 +165,7 @@ export default class ProfilesScreen extends React.Component {
                 <View style={styles.container}>
                     <View style={styles.nameContainer}>
                         <Text h1 style={styles.textStyle}>{this.state.firstName} {this.state.lastName}</Text>
-                        <Text h2 style={styles.textStyle}>{this.state.email ? this.state.email : 'Place for Email'}</Text>
+                        <Text h4 style={styles.textStyle}>{this.state.email ? this.state.email : 'Place for Email'}</Text>
                         {this.state.profile_picture ?
                             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                                 <Image
@@ -195,7 +174,7 @@ export default class ProfilesScreen extends React.Component {
                                     }}
                                     style={styles.userImage}
                                 /></View> : null}
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', alignItems: 'center' }}>For profile picture, click below</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', textAlign: 'center' }}>For profile picture, click below</Text>
                         <View style={styles.photoOption}>
                             <View>
 
@@ -258,8 +237,8 @@ const styles = StyleSheet.create({
         borderRadius: 300
     },
     textStyle: {
-        padding: 10
-    },
+        padding: 10,
+        textAlign: 'center'},
     container: {
         flex: 1,
         flexDirection: 'column',
