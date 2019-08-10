@@ -86,12 +86,12 @@ export default class ProfilesScreen extends React.Component {
     }
 
     componentDidMount() {
-        console.log(this.props.navigation.state.params.item)
         let userId = this.props.navigation.state.params.item.userid
         let ref = firebase.database().ref("users/");
         let query = ref.orderByKey()
-            .equalTo(userId)
+            .equalTo(`${userId}`)
         query.on("value", (snapshot) => {
+            console.log(snapshot)
             let user = Object.values(snapshot.val())[0]
             this.setState({
                 firstName: user.firstname,

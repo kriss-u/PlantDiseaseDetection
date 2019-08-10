@@ -65,6 +65,7 @@ class Post extends Component {
         let imageHeight = Math.floor(imageWidth * 0.6)
         let username = this.props.item.name
         let body = this.props.item.body
+        let userid = this.props.item.userid
         //calculate number of likes
         let upvotes = this.props.item.likes ? Object.keys(this.props.item.likes).length : 0
         let comments = this.props.item.comments
@@ -78,7 +79,7 @@ class Post extends Component {
             <View style={{ flex: 1, width: 100 + "%" }}>
                 <TouchableOpacity
                     onPress={() => nav.navigate('OtherUsersProfilesScreen', {
-                        item: { item }
+                        item: { userid }
                     })}
                 >
                     <View style={styles.userBar}>
