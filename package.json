@@ -9,7 +9,7 @@
   "dependencies": {
     "@react-native-community/netinfo": "^3.3.0-reachability.4",
     "emoji-regex": "^8.0.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "react": "16.8.3",
     "react-native": "0.59.8",
     "react-native-comments": "^1.1.5",
